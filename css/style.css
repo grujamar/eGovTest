@@ -1,0 +1,28 @@
+
+
+#beforeCreateTest .submit-span {
+    color: red;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+#beforeCreateTest .submit-label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+
+#beforeCreateTest .submit-dropdownlist {
+    font-size: 14px;
+    border: 1.5px solid #bdbdbd;
+    background: rgba(255,255,255,0);
+    box-shadow: 0 0 1px #bdbdbd inset;
+    padding: 3px 10px;
+    width: 80%;
+}
+
+#beforeCreateTest .submit-customValidator {
+    font-size: 14px;
+    font-weight: bold;
+    color: red;
+}
