@@ -99,6 +99,75 @@ public class ProjectUtility
     }
 
 
+    public List<TestCombination> spCreateTestSession(int MethodId)
+    {
+        List<TestCombination> TestCombinationList = new List<TestCombination>();
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand("spCreateTestSession", objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    objCmd.Parameters.Add("@MethodId", System.Data.SqlDbType.Int).Value = MethodId;
+
+                    objCmd.Parameters.Add("@result", System.Data.SqlDbType.Int);
+                    objCmd.Parameters["@result"].Direction = ParameterDirection.ReturnValue;
+
+                    objConn.Open();
+                    SqlDataReader reader = objCmd.ExecuteReader();
+
+                    int rowNumber = 0;
+                    List<TestCombinationParameter> TestCombinationParameterList = new List<TestCombinationParameter>();
+
+                    while (reader.Read())
+                    {
+                        int NumberOfParameters = reader.GetInt32(0);
+                        int NumberOfCombinations = reader.GetInt32(1);
+                        int CombinationOrdinalNumber = reader.GetInt32(2);
+                        bool ExpectedOutcome = (bool)reader.GetSqlBoolean(3);
+                        int ParameterOrdinalNumber = reader.GetInt32(4);
+                        string ParameterName = reader.GetSqlString(5).ToString();
+                        string ParameterValue = reader.GetSqlString(6).ToString();
+
+                        rowNumber++;
+
+                        if (rowNumber % NumberOfParameters == 0)
+                        {
+                            TestCombinationParameterList = new List<TestCombinationParameter>();
+                        }
+
+                        TestCombinationParameter testCombinationParameter = new TestCombinationParameter(ParameterOrdinalNumber, ParameterName, ParameterValue);
+                        TestCombinationParameterList.Add(testCombinationParameter);
+
+                        if ((rowNumber + 1) % NumberOfParameters == 0)
+                        {
+                            TestCombination testCombination = new TestCombination(CombinationOrdinalNumber, ExpectedOutcome, TestCombinationParameterList);
+                            TestCombinationList.Add(testCombination);
+                        }
+                    }
+
+                    int result = Convert.ToInt32(objCmd.Parameters["@result"].Value);
+                    if (!result.Equals(0))
+                    {
+                        throw new Exception(result.ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
+        }
+
+        return TestCombinationList;
+    }
+
+
+
+
     public int getMethodID(string MethodName)
     {
         int MethodID = 0;

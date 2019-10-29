@@ -14,9 +14,22 @@ using System.Xml.XPath;
 public static class ApiUtils
 {
     public static string SettingsFile { get; private set; }
-    public static string RegisterUser_Url { get; set; }
-    public static string RegisterUser_ContentType { get; set; }
-    public static string RegisterUser_Method { get; set; }
+    public static string RegisterUser_Url_Out { get; set; }
+    public static string RegisterUser_ContentType_Out { get; set; }
+    public static string RegisterUser_Method_Out { get; set; }
+    public static string RegisterUser_Username_Out { get; set; }
+    public static string RegisterUser_Password_Out { get; set; }
+    public static string SearchUserIDByUsername_Url_Out { get; set; }
+    public static string SearchUserIDByUsername_ContentType_Out { get; set; }
+    public static string SearchUserIDByUsername_Method_Out { get; set; }
+    public static string SearchUserIDByUsername_Username_Out { get; set; }
+    public static string SearchUserIDByUsername_Password_Out { get; set; }
+    public static string SCIMcheckData_Url_Out { get; set; }
+    public static string SCIMcheckData_ContentType_Out { get; set; }
+    public static string SCIMcheckData_Method_Out { get; set; }
+    public static string SCIMcheckData_Username_Out { get; set; }
+    public static string SCIMcheckData_Password_Out { get; set; }
+
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -44,61 +57,151 @@ public static class ApiUtils
             if (navigator.HasChildren)
             {
                 navigator.MoveToFirstChild();//<RegisterUser>
-                if (navigator.Name == "RegisterUser")
+                do
                 {
-                    do
+                    if (navigator.Name == "RegisterUser")
                     {
-                        navigator.MoveToFirstChild();
-                        if (navigator.Name == "url")
-                        {
-                            RegisterUser_Url = navigator.Value;
-                        }
+                        LoopingThrowNavigatorChild(navigator, out string RegisterUser_Url_Out_Final, out string RegisterUser_ContentType_Out_Final, out string RegisterUser_Method_Out_Final, out string RegisterUser_Username_Out_Final, out string RegisterUser_Password_Out_Final);
+                        RegisterUser_Url_Out = RegisterUser_Url_Out_Final;
+                        RegisterUser_ContentType_Out = RegisterUser_ContentType_Out_Final;
+                        RegisterUser_Method_Out = RegisterUser_Method_Out_Final;
+                        RegisterUser_Username_Out = RegisterUser_Username_Out_Final;
+                        RegisterUser_Password_Out = RegisterUser_Password_Out_Final;
                         navigator.MoveToFollowing(XPathNodeType.Element);
-                        if (navigator.Name == "contentType")
-                        {
-                            RegisterUser_ContentType = navigator.Value;
-                        }
+                    }
+                    if (navigator.Name == "SearchUserIDByUsername")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string SearchUserIDByUsername_Url_Out_Final, out string SearchUserIDByUsername_ContentType_Out_Final, out string SearchUserIDByUsername_Method_Out_Final, out string SearchUserIDByUsername_Username_Out_Final, out string SearchUserIDByUsername_Password_Out_Final);
+                        SearchUserIDByUsername_Url_Out = SearchUserIDByUsername_Url_Out_Final;
+                        SearchUserIDByUsername_ContentType_Out = SearchUserIDByUsername_ContentType_Out_Final;
+                        SearchUserIDByUsername_Method_Out = SearchUserIDByUsername_Method_Out_Final;
+                        SearchUserIDByUsername_Username_Out = SearchUserIDByUsername_Username_Out_Final;
+                        SearchUserIDByUsername_Password_Out = SearchUserIDByUsername_Password_Out_Final;
                         navigator.MoveToFollowing(XPathNodeType.Element);
-                        if (navigator.Name == "method")
-                        {
-                            RegisterUser_Method = navigator.Value;
-                        }
-                        log.Info("Get parameters from settings file : URL - " + RegisterUser_Url + " . Content Type - " + RegisterUser_ContentType + " . Method - " + RegisterUser_Method);
-                        navigator.MoveToFollowing(XPathNodeType.Element);
-
-                        navigator.MoveToParent();
-
-                    } while (navigator.MoveToNext());
-                }
+                        navigator.MoveToNext();
+                    }
+                    if (navigator.Name == "SCIMcheckData")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string SCIMcheckData_Url_Out_Final, out string SCIMcheckData_ContentType_Out_Final, out string SCIMcheckData_Method_Out_Final, out string SCIMcheckData_Username_Out_Final, out string SCIMcheckData_Password_Out_Final);
+                        SCIMcheckData_Url_Out = SCIMcheckData_Url_Out_Final;
+                        SCIMcheckData_ContentType_Out = SCIMcheckData_ContentType_Out_Final;
+                        SCIMcheckData_Method_Out = SCIMcheckData_Method_Out_Final;
+                        SCIMcheckData_Username_Out = SCIMcheckData_Username_Out_Final;
+                        SCIMcheckData_Password_Out = SCIMcheckData_Password_Out_Final;
+                    }
+                } while (navigator.MoveToNext());
             }
         }
         catch (Exception ex)
         {
-            log.Error("Error while reading configuration data.. " + ex.Message);
+            log.Error("Error while reading configuration data. " + ex.Message);
         }
     }
+
+    public static void LoopingThrowNavigatorChild(XPathNavigator navigator, out string Url_Out, out string ContentType_Out, out string Method_Out, out string Username_Out, out string Password_Out)
+    {
+        Url_Out = string.Empty;
+        ContentType_Out = string.Empty;
+        Method_Out = string.Empty;
+        Username_Out = string.Empty;
+        Password_Out = string.Empty;
+
+        do
+        {
+            navigator.MoveToFirstChild();
+            if (navigator.Name == "url")
+            {
+                Url_Out = navigator.Value;
+            }
+            navigator.MoveToFollowing(XPathNodeType.Element);
+            if (navigator.Name == "contentType")
+            {
+                ContentType_Out = navigator.Value;
+            }
+            navigator.MoveToFollowing(XPathNodeType.Element);
+            if (navigator.Name == "method")
+            {
+                Method_Out = navigator.Value;
+            }
+            navigator.MoveToFollowing(XPathNodeType.Element);
+            if (navigator.Name == "username")
+            {
+                Username_Out = navigator.Value;
+            }
+            navigator.MoveToFollowing(XPathNodeType.Element);
+            if (navigator.Name == "password")
+            {
+                Password_Out = navigator.Value;
+            }
+            log.Info("Get parameters from settings file : URL - " + Url_Out + " . Content Type - " + ContentType_Out + " . Method - " + Method_Out + " . Username - " + Username_Out + " . Password - " + Password_Out);
+            navigator.MoveToFollowing(XPathNodeType.Element);
+
+            navigator.MoveToParent();
+
+        } while (navigator.MoveToNext());  
+    }
+
+
+    /******BASIC AUTH*******/
+    public static string RegisterUser_BasicAuth = RegisterUser_Username_Out + ":" + RegisterUser_Password_Out;
+    public static string SearchUserIDByUsername_BasicAuth = SearchUserIDByUsername_Username_Out + ":" + SearchUserIDByUsername_Password_Out;
+    public static string SCIMcheckData_BasicAuth = String.Concat(SCIMcheckData_Username_Out, SCIMcheckData_Password_Out);
 
 
     public static string RegisterUserWebRequestCall(string data)
     {
-        return WebRequestCall(data, RegisterUser_Url, RegisterUser_Method, RegisterUser_ContentType);
+        return WebRequestCall(data, RegisterUser_Url_Out, RegisterUser_Method_Out, RegisterUser_ContentType_Out, RegisterUser_BasicAuth, out string resultFinal);
+    }
+
+    public static string SearchUserIDByUsernameWebRequestCall(string data, string username, out string resultFinalSearchUserIDByUsername)
+    {
+        resultFinalSearchUserIDByUsername = string.Empty;
+        string WebCall = WebRequestCall(data, (SearchUserIDByUsername_Url_Out + username), SearchUserIDByUsername_Method_Out, SearchUserIDByUsername_ContentType_Out, SearchUserIDByUsername_BasicAuth, out string resultFinal);
+        resultFinalSearchUserIDByUsername = resultFinal;
+        return WebCall;
+    }
+
+    public static string SCIMcheckDataWebRequestCall(string data, string UserID, out string resultFinalSCIMcheckData)
+    {
+        resultFinalSCIMcheckData = string.Empty;
+        string WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal);
+        resultFinalSCIMcheckData = resultFinal;
+        return resultFinalSCIMcheckData;
     }
 
 
-    public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType)
+    public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal)
     {
         string result = string.Empty;
+        resultFinal = string.Empty;
         try
         {
             log.Info("Start getting result ");
+            /////Uvedeno zbog greske:the request was aborted could not create ssl/tls secure channel.
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
+
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(apiUrl);
             httpWebRequest.ContentType = apiContentType;
             httpWebRequest.Method = apiMethod;
 
-            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+            /////Uvedeno zbog greske:the request was aborted could not create ssl/tls secure channel.
+            httpWebRequest.ProtocolVersion = HttpVersion.Version10;
+            httpWebRequest.PreAuthenticate = true;
+
+            if (apiAuth != string.Empty)
             {
-                log.Info("Json data for Register user " + data);
-                streamWriter.Write(data);
+                httpWebRequest.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.Default.GetBytes(apiAuth));
+            }
+            
+            if (data != string.Empty)
+            { 
+                using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+                {
+                    log.Info("Json data for Register user " + data);
+                    streamWriter.Write(data);
+                }
             }
 
             try
@@ -108,6 +211,7 @@ public static class ApiUtils
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
                 {
                     var res = streamReader.ReadToEnd();
+                    resultFinal = res;
                     log.Info("Result is " + res);
                 }
             }
@@ -140,6 +244,14 @@ public static class ApiUtils
         }
         return result;
     }
+
+
+    public static bool AcceptAllCertifications(object sender, System.Security.Cryptography.X509Certificates.X509Certificate certification, System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
+    {
+        return true;
+    }
+
+
 
     public static void GetStatusAndDescriptionCode(HttpWebResponse httpResponse)
     {

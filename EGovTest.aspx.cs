@@ -1,4 +1,5 @@
 ﻿using log4net;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +16,6 @@ public partial class EGovTest : System.Web.UI.Page
 {
     //Lofg4Net declare log variable
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-    public RegisterUser RegisterUser;
     public string SettingsFile { get; private set; }
     public string Url { get; set; }
     public string ContentType { get; set; }
@@ -63,10 +63,10 @@ public partial class EGovTest : System.Web.UI.Page
             {
                 //todo call procedure for Create Test
                 ProjectUtility utility = new ProjectUtility();
-                List<RegisterUserTest> RegisterUsers = new List<RegisterUserTest>();
-                log.Info("Start prepared list for Register user. ");
-                PreparedRegisterUsersList(utility, out RegisterUsers);
-                log.Info("End prepared list for Register user. ");
+                List<TestCombination> TestCombination = new List<TestCombination>();
+                log.Info("Start prepared list for Test combinations. ");
+                PreparedTestCombinationList(utility, out TestCombination);
+                log.Info("End prepared list for Test combinations. ");
             }
         }
         catch (Exception ex)
@@ -95,26 +95,26 @@ public partial class EGovTest : System.Web.UI.Page
     }
 
 
-    protected void PreparedRegisterUsersList(ProjectUtility utility, out List<RegisterUserTest> RegisterUsersFinal)
+    protected void PreparedTestCombinationList(ProjectUtility utility, out List<TestCombination> TestCombinationListFinal)
     {
-        RegisterUsersFinal = new List<RegisterUserTest>();
+        TestCombinationListFinal = new List<TestCombination>();
         try
         {
-            List<RegisterUserTest> RegisterUsers = new List<RegisterUserTest>();
+            List<TestCombination> TestCombinationList = new List<TestCombination>();
 
-            RegisterUsers = utility.SelectAllCombinationsRegisterUser(Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]));
+            TestCombinationList = utility.spCreateTestSession(Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]));
 
-            if (RegisterUsers.Count>0)
+            if (TestCombinationList.Count>0)
             {
-                Session["EGovTest_RegisterUsers"] = RegisterUsers;
+                Session["EGovTest_TestCombinationList"] = TestCombinationList;
                 ChangeVisibility(false);
             }
 
-            RegisterUsersFinal = RegisterUsers;
+            TestCombinationListFinal = TestCombinationList;
         }
         catch (Exception ex)
         {
-            log.Error("Error on PreparedRegisterUsersList. " + ex.Message);
+            log.Error("Error on PreparedTestCombinationList. " + ex.Message);
             ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
         }
         
@@ -122,12 +122,12 @@ public partial class EGovTest : System.Web.UI.Page
 
     protected void RegisterUserAutoTest()
     {
-        //string item_Username = "testPIS16";
+        //string item_Username = "testPIS41";
         //string item_Realm = "PRIMARY";
         //string item_Password = "P@ssword123456!";
-        //string item_Externalid = "646464";
-        //string item_Givenname = "Pera1";
-        //string item_Lastname = "Pisar1";
+        //string item_Externalid = "1809985500255";
+        //string item_Givenname = "Perica";
+        //string item_Lastname = "Pisaric";
         //string item_Emailaddress = "test16@pis.rs";
         //string item_DOB = "20020202";
         //string item_Placeofbirth = "serbia";
@@ -139,19 +139,121 @@ public partial class EGovTest : System.Web.UI.Page
 
         try
         {
-            List<RegisterUserTest> RegisterUsers = new List<RegisterUserTest>();
-            RegisterUsers = (List<RegisterUserTest>)Session["EGovTest_RegisterUsers"];
-            log.Debug("Register user list length: " + RegisterUsers.Count);
-            foreach (var item in RegisterUsers)
+            List<TestCombination> TestCombinationList = new List<TestCombination>();
+            TestCombinationList = (List<TestCombination>)Session["EGovTest_TestCombinationList"];
+            log.Debug("TestCombinationList length: " + TestCombinationList.Count);
+            foreach (var item in TestCombinationList)
             {
-                string json = ApiUtils.GetRegisterUserJson(item.Username, item.Realm, item.Password, item.Externalid, item.Givenname, item.Lastname, item.Emailaddress, item.DOB, item.Placeofbirth, item.Gender, item.Streetaddress, item.City, item.Postalcode, item.Country);
-                string WebResponse = ApiUtils.RegisterUserWebRequestCall(json);
+                List<TestCombinationParameter> TestCombinationParameterList = new List<TestCombinationParameter>();
+                TestCombinationParameterList = item.ParameterList;
+
+                string requestTemplate = @"{    ""user"": {
+                       ""username"": ""%username"",
+                        ""realm"": ""%realm"",
+                        ""password"": ""%password"",
+                        ""claims"": [
+        	                {
+                                ""uri"": ""http://wso2.org/claims/externalid"",
+                                ""value"": ""%externalid""
+                            },
+                            {
+                                ""uri"": ""http://wso2.org/claims/givenname"",
+                                ""value"": ""%givenname""
+                            },
+                            {
+                                ""uri"": ""http://wso2.org/claims/lastname"",
+                                ""value"": ""%lastname""
+                            },            
+                            {
+                                ""uri"": ""http://wso2.org/claims/emailaddress"",
+                                ""value"": ""%emailaddress""
+                            },
+                            {
+                                ""uri"": ""http://wso2.org/claims/dob"",
+                                ""value"": ""%dob""
+                            },
+                            {
+                                ""uri"": ""http://wso2.org/claims/placeofbirth"",
+                                ""value"": ""%placeofbirth""
+                            },  
+                            {
+                                ""uri"": ""http://wso2.org/claims/gender"",
+                                ""value"": ""%gender""
+                            }, 
+                            {
+                                ""uri"": ""http://wso2.org/claims/streetaddress"",
+                                ""value"": ""%streetaddress""
+                            },   
+                            {
+                                ""uri"": ""http://wso2.org/claims/city"",
+                                ""value"": ""%city""
+                            },   
+                            {
+                                ""uri"": ""http://wso2.org/claims/postalcode"",
+                                ""value"": ""%postalcode""
+                            },             
+                            {
+                                ""uri"": ""http://wso2.org/claims/country"",
+                                ""value"": ""%country""
+                            }
+                        ]
+                    },
+                    ""properties"": [],
+                    ""DuplicateHandling"": ""%DuplicateHandling"",
+                    ""AuthenticationMethod"": ""%AuthenticationMethod""
+                }";
+
+
+                foreach (var itemParameter in TestCombinationParameterList)
+                {
+
+                    TestCombinationParameter TestCombinationParameter = (TestCombinationParameter)itemParameter;
+                    string parameterName = TestCombinationParameter.ParameterName;
+                    string parameterValue = TestCombinationParameter.ParameterValue;
+
+                    string forChange = "" + "%" + parameterName + "";
+                    requestTemplate.Replace(forChange, parameterValue);
+
+                    log.Info("requestTemplate: " + requestTemplate);
+
+                    //string jsonRegisterUser = ApiUtils.GetRegisterUserJson(item.Username, item.Realm, item.Password, item.Externalid, item.Givenname, item.Lastname, item.Emailaddress, item.DOB, item.Placeofbirth, item.Gender, item.Streetaddress, item.City, item.Postalcode, item.Country);
+                    //string jsonRegisterUser = ApiUtils.GetRegisterUserJson(item_Username, item_Realm, item_Password, item_Externalid, item_Givenname, item_Lastname, item_Emailaddress, item_DOB, item_Placeofbirth, item_Gender, item_Streetaddress, item_City, item_Postalcode, item_Country);
+                    string RegisterUser_Response = ApiUtils.RegisterUserWebRequestCall(requestTemplate);
+
+                    log.Info("Start SearchUserIDByUsername ");
+                    string resultFinalSearchUserIDByUsername = string.Empty;
+                    //todo string.empty   item.Username
+                    string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsernameWebRequestCall(string.Empty, string.Empty, out resultFinalSearchUserIDByUsername);
+                    string UserId = ParseResponse(resultFinalSearchUserIDByUsername);
+                    log.Info("End SearchUserIDByUsername. Response result is: " + UserId);
+
+                    log.Info("Start calling SCIM web service for retrieving data. ");
+                    string resultFinalSCIMcheckData = string.Empty;
+                    string SCIMcheckData_Response = ApiUtils.SCIMcheckDataWebRequestCall(string.Empty, UserId, out resultFinalSCIMcheckData);
+
+                    log.Info("End calling SCIM web service. Response result is: " + resultFinalSCIMcheckData);
+                }  
             }
         }
         catch (Exception ex)
         {
             throw new Exception("Error in function RegisterUserAutoTest. " + ex.Message);
         }
+    }
+
+
+
+
+    protected string ParseResponse(string jsonResponse)
+    {
+        string res = string.Empty;
+
+        // Parse your Result to an Array
+        var x = JObject.Parse(jsonResponse);
+        var res1 = x["userId"];
+        res = res1.ToString();
+
+        return res;
     }
 
     protected void Cvmethod_ServerValidate(object source, ServerValidateEventArgs args)
