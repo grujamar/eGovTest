@@ -63,10 +63,10 @@ public partial class EGovTest : System.Web.UI.Page
             {
                 //todo call procedure for Create Test
                 ProjectUtility utility = new ProjectUtility();
-                List<TestCombination> TestCombination = new List<TestCombination>();
-                log.Info("Start prepared list for Test combinations. ");
-                PreparedTestCombinationList(utility, out TestCombination);
-                log.Info("End prepared list for Test combinations. ");
+                List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
+                log.Info("Start prepared Requests for test. ");
+                PreparedRequestsForTests(utility, out TestSessionRequestsParameterList);
+                log.Info("End prepared Requests for test. ");
             }
         }
         catch (Exception ex)
@@ -80,10 +80,18 @@ public partial class EGovTest : System.Web.UI.Page
     {
         try
         {
-            log.Info("Start Register user. ");
-            RegisterUserAutoTest();
-            log.Info("End Register user. ");
-
+            int methodID = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
+            switch (methodID)
+            {
+                case 2:
+                    log.Info("Start Register user. ");
+                    RegisterUserAutoTest();
+                    log.Info("End Register user. ");
+                    break;
+                case 5:
+                    Console.WriteLine(5);
+                    break;
+            }
 
             ScriptManager.RegisterStartupScript(this, GetType(), "SuccessSendingData", "SuccessSendingData();", true);
         }
@@ -95,26 +103,26 @@ public partial class EGovTest : System.Web.UI.Page
     }
 
 
-    protected void PreparedTestCombinationList(ProjectUtility utility, out List<TestCombination> TestCombinationListFinal)
+    protected void PreparedRequestsForTests(ProjectUtility utility, out List<TestSessionRequestsParameters> TestSessionRequestsParameterFinal)
     {
-        TestCombinationListFinal = new List<TestCombination>();
+        TestSessionRequestsParameterFinal = new List<TestSessionRequestsParameters>();
         try
         {
-            List<TestCombination> TestCombinationList = new List<TestCombination>();
+            List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
 
-            TestCombinationList = utility.spCreateTestSession(Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]));
+            TestSessionRequestsParameterList = utility.spCreateTestSessionRequests(Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]));
 
-            if (TestCombinationList.Count>0)
+            if (TestSessionRequestsParameterList.Count>0)
             {
-                Session["EGovTest_TestCombinationList"] = TestCombinationList;
+                Session["EGovTest_TestSessionRequestsParameterList"] = TestSessionRequestsParameterList;
                 ChangeVisibility(false);
             }
 
-            TestCombinationListFinal = TestCombinationList;
+            TestSessionRequestsParameterFinal = TestSessionRequestsParameterList;
         }
         catch (Exception ex)
         {
-            log.Error("Error on PreparedTestCombinationList. " + ex.Message);
+            log.Error("Error on PreparedRequestsForTests. " + ex.Message);
             ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
         }
         
@@ -122,117 +130,56 @@ public partial class EGovTest : System.Web.UI.Page
 
     protected void RegisterUserAutoTest()
     {
-        //string item_Username = "testPIS41";
-        //string item_Realm = "PRIMARY";
-        //string item_Password = "P@ssword123456!";
-        //string item_Externalid = "1809985500255";
-        //string item_Givenname = "Perica";
-        //string item_Lastname = "Pisaric";
-        //string item_Emailaddress = "test16@pis.rs";
-        //string item_DOB = "20020202";
-        //string item_Placeofbirth = "serbia";
-        //string item_Gender = "male";
-        //string item_Streetaddress = "StreetaddressTest";
-        //string item_City = "belgrade";
-        //string item_Postalcode = "11000";
-        //string item_Country = "serbia";
-
         try
         {
-            List<TestCombination> TestCombinationList = new List<TestCombination>();
-            TestCombinationList = (List<TestCombination>)Session["EGovTest_TestCombinationList"];
-            log.Debug("TestCombinationList length: " + TestCombinationList.Count);
-            foreach (var item in TestCombinationList)
+            int result = 0;
+            ProjectUtility utility = new ProjectUtility();
+            List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
+            TestSessionRequestsParameterList = (List<TestSessionRequestsParameters>)Session["EGovTest_TestSessionRequestsParameterList"];
+            log.Debug("TestCombinationList length: " + TestSessionRequestsParameterList.Count);
+
+            //get TestSessionId from first object poarameter
+            var firstElement = TestSessionRequestsParameterList.First();
+            int TestSessionId = firstElement.TestSessionId;
+            log.Info("TestSessionId is: " + TestSessionId);
+            utility.testSessionStart(TestSessionId, out result);
+            if (result != 0)
             {
-                List<TestCombinationParameter> TestCombinationParameterList = new List<TestCombinationParameter>();
-                TestCombinationParameterList = item.ParameterList;
+                throw new Exception("Error while trying to start test session. Result is: " + result);
+            }
 
-                string requestTemplate = @"{    ""user"": {
-                       ""username"": ""%username"",
-                        ""realm"": ""%realm"",
-                        ""password"": ""%password"",
-                        ""claims"": [
-        	                {
-                                ""uri"": ""http://wso2.org/claims/externalid"",
-                                ""value"": ""%externalid""
-                            },
-                            {
-                                ""uri"": ""http://wso2.org/claims/givenname"",
-                                ""value"": ""%givenname""
-                            },
-                            {
-                                ""uri"": ""http://wso2.org/claims/lastname"",
-                                ""value"": ""%lastname""
-                            },            
-                            {
-                                ""uri"": ""http://wso2.org/claims/emailaddress"",
-                                ""value"": ""%emailaddress""
-                            },
-                            {
-                                ""uri"": ""http://wso2.org/claims/dob"",
-                                ""value"": ""%dob""
-                            },
-                            {
-                                ""uri"": ""http://wso2.org/claims/placeofbirth"",
-                                ""value"": ""%placeofbirth""
-                            },  
-                            {
-                                ""uri"": ""http://wso2.org/claims/gender"",
-                                ""value"": ""%gender""
-                            }, 
-                            {
-                                ""uri"": ""http://wso2.org/claims/streetaddress"",
-                                ""value"": ""%streetaddress""
-                            },   
-                            {
-                                ""uri"": ""http://wso2.org/claims/city"",
-                                ""value"": ""%city""
-                            },   
-                            {
-                                ""uri"": ""http://wso2.org/claims/postalcode"",
-                                ""value"": ""%postalcode""
-                            },             
-                            {
-                                ""uri"": ""http://wso2.org/claims/country"",
-                                ""value"": ""%country""
-                            }
-                        ]
-                    },
-                    ""properties"": [],
-                    ""DuplicateHandling"": ""%DuplicateHandling"",
-                    ""AuthenticationMethod"": ""%AuthenticationMethod""
-                }";
-
-
-                foreach (var itemParameter in TestCombinationParameterList)
+            try
+            {
+                foreach (var item in TestSessionRequestsParameterList)
                 {
+                    log.Info("item.RequestData is " + item.RequestData);
+                    utility.testCombinationStart(item.TestCombinationId, out result);
+                    if (result != 0)
+                    {
+                        throw new Exception("Error while trying to start combination. Result is: " + result);
+                    }
 
-                    TestCombinationParameter TestCombinationParameter = (TestCombinationParameter)itemParameter;
-                    string parameterName = TestCombinationParameter.ParameterName;
-                    string parameterValue = TestCombinationParameter.ParameterValue;
+                    string username = string.Empty;
+                    username = ParseRequestForUsername(item.RequestData);
+                    WebAPICalls(item.RequestData, username, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome);
 
-                    string forChange = "" + "%" + parameterName + "";
-                    requestTemplate.Replace(forChange, parameterValue);
+                    log.Info("testCombinationFinish with parameters: " + " RequestData - " + item.RequestData + " Response - " + Response + " ResponseStatus - " + ResponseStatus + " ResponseExternal - " + ResponseExternal + " ResponseStatusExternal - " + ResponseStatusExternal + " FinalOutcome - " + FinalOutcome);
+                    utility.testCombinationFinish(item.TestCombinationId, Response, ResponseStatus, ResponseExternal, ResponseStatusExternal, FinalOutcome, out result);
+                    if (result != 0)
+                    {
+                        throw new Exception("Error while trying to end combination. Result is: " + result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error. " + ex.Message);
+            }
 
-                    log.Info("requestTemplate: " + requestTemplate);
-
-                    //string jsonRegisterUser = ApiUtils.GetRegisterUserJson(item.Username, item.Realm, item.Password, item.Externalid, item.Givenname, item.Lastname, item.Emailaddress, item.DOB, item.Placeofbirth, item.Gender, item.Streetaddress, item.City, item.Postalcode, item.Country);
-                    //string jsonRegisterUser = ApiUtils.GetRegisterUserJson(item_Username, item_Realm, item_Password, item_Externalid, item_Givenname, item_Lastname, item_Emailaddress, item_DOB, item_Placeofbirth, item_Gender, item_Streetaddress, item_City, item_Postalcode, item_Country);
-                    string RegisterUser_Response = ApiUtils.RegisterUserWebRequestCall(requestTemplate);
-
-                    log.Info("Start SearchUserIDByUsername ");
-                    string resultFinalSearchUserIDByUsername = string.Empty;
-                    //todo string.empty   item.Username
-                    string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsernameWebRequestCall(string.Empty, string.Empty, out resultFinalSearchUserIDByUsername);
-                    string UserId = ParseResponse(resultFinalSearchUserIDByUsername);
-                    log.Info("End SearchUserIDByUsername. Response result is: " + UserId);
-
-                    log.Info("Start calling SCIM web service for retrieving data. ");
-                    string resultFinalSCIMcheckData = string.Empty;
-                    string SCIMcheckData_Response = ApiUtils.SCIMcheckDataWebRequestCall(string.Empty, UserId, out resultFinalSCIMcheckData);
-
-                    log.Info("End calling SCIM web service. Response result is: " + resultFinalSCIMcheckData);
-                }  
+            utility.testSessionFinish(TestSessionId, out result);
+            if (result != 0)
+            {
+                throw new Exception("Error while trying to finish test session. Result is: " + result);
             }
         }
         catch (Exception ex)
@@ -241,8 +188,77 @@ public partial class EGovTest : System.Web.UI.Page
         }
     }
 
+    protected void WebAPICalls(string jsonData, string Username, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    {
+        Response = string.Empty;
+        ResponseStatus = string.Empty;
+        ResponseExternal = string.Empty;
+        ResponseStatusExternal = string.Empty;
+        FinalOutcome = false;
+        bool FinalOutcomeFirstStep = false;
+        bool FinalOutcomeSecondStep = false;
+
+        try
+        {
+            //Register user API start
+            log.Info("Register user API start. ");
+            string RegisterUser_Response = ApiUtils.RegisterUserWebRequestCall(jsonData, out string resultResponse, out string statusCode, out string statusDescription, out string resulNotOK);
+            ResponseStatus = statusCode + " " + statusDescription;
+            if (Convert.ToInt32(statusCode) == ConstantsProject.REGISTER_USER_ОК)
+            {
+                FinalOutcomeFirstStep = true;
+                Response = resultResponse;
+            }
+            else {
+                Response = resulNotOK;
+            }
+            log.Info("Register user API end. Response result is: " + Response + " " + ResponseStatus);
+
+            log.Info("Start SearchUserIDByUsername ");
+            string resultFinalSearchUserIDByUsername = string.Empty;
+            //todo string.empty   item.Username
+            string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsernameWebRequestCall(string.Empty, Username, out resultFinalSearchUserIDByUsername, out string statusCodeSearch, out string statusDescriptionSearch, out string resulNotOKsearch);
+            string UserId = ParseResponse(resultFinalSearchUserIDByUsername);
+            log.Info("End SearchUserIDByUsername. Response result is: " + UserId);
+
+            if (UserId != string.Empty)
+            {
+                log.Info("Start calling SCIM web service. ");
+                string resultFinalSCIMcheckData = string.Empty;
+                string SCIMcheckData_Response = ApiUtils.SCIMcheckDataWebRequestCall(string.Empty, UserId, out resultFinalSCIMcheckData, out string statusCodeSCIM, out string statusDescriptionSCIM, out string resultNotOKscim);
+                ResponseExternal = resultFinalSCIMcheckData;
+                ResponseStatusExternal = statusCodeSCIM + " " + statusDescriptionSCIM;
+                if (Convert.ToInt32(statusCode) == ConstantsProject.REGISTER_USER_SCIM_ОК)
+                {
+                    FinalOutcomeSecondStep = true;
+                }
+                log.Info("End calling SCIM web service. ");
 
 
+                FinalOutcome = CheckFinalOutcome(FinalOutcomeFirstStep, FinalOutcomeSecondStep);
+                log.Info("FinalOutcome is - " + FinalOutcome); 
+            }
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error in function WebAPICalls. " + ex.Message);
+            //throw new Exception("Error in function WebAPICalls. " + ex.Message);
+        }
+    }
+
+
+    protected bool CheckFinalOutcome(bool firstStep, bool secondStep)
+    {
+        bool retValue = false;
+        if (firstStep && secondStep)
+        {
+            retValue = true;
+        }
+        else {
+            retValue = false;
+        }
+        return retValue;
+    }
 
     protected string ParseResponse(string jsonResponse)
     {
@@ -255,6 +271,19 @@ public partial class EGovTest : System.Web.UI.Page
 
         return res;
     }
+
+    protected string ParseRequestForUsername(string jsonResponse)
+    {
+        string res = string.Empty;
+
+        // Parse your Result to an Array
+        var x = JObject.Parse(jsonResponse);
+        var res1 = x["user"]["username"];
+        res = res1.ToString();
+
+        return res;
+    }
+
 
     protected void Cvmethod_ServerValidate(object source, ServerValidateEventArgs args)
     {
@@ -273,11 +302,95 @@ public partial class EGovTest : System.Web.UI.Page
         }
     }
 
-
     protected void ddlmethod_SelectedIndexChanged(object sender, EventArgs e)
     {
         int SelectedValue = Convert.ToInt32(ddlmethod.SelectedValue);
         Session["EGovTest_ddlSelectedValue"] = SelectedValue;
     }
 
+
+    //List<TestCombination> TestCombinationList = new List<TestCombination>();
+    //TestCombinationList = (List<TestCombination>)Session["EGovTest_TestSessionRequestsParameterList"];
+    //log.Debug("TestCombinationList length: " + TestCombinationList.Count);
+    //foreach (var item in TestCombinationList)
+    //{
+    //    List<TestCombinationParameter> TestCombinationParameterList = new List<TestCombinationParameter>();
+    //    TestCombinationParameterList = item.ParameterList;
+
+    //    string requestTemplate = @"{    ""user"": {
+    //           ""username"": ""%username"",
+    //            ""realm"": ""%realm"",
+    //            ""password"": ""%password"",
+    //            ""claims"": [
+    //             {
+    //                    ""uri"": ""http://wso2.org/claims/externalid"",
+    //                    ""value"": ""%externalid""
+    //                },
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/givenname"",
+    //                    ""value"": ""%givenname""
+    //                },
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/lastname"",
+    //                    ""value"": ""%lastname""
+    //                },            
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/emailaddress"",
+    //                    ""value"": ""%emailaddress""
+    //                },
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/dob"",
+    //                    ""value"": ""%dob""
+    //                },
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/placeofbirth"",
+    //                    ""value"": ""%placeofbirth""
+    //                },  
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/gender"",
+    //                    ""value"": ""%gender""
+    //                }, 
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/streetaddress"",
+    //                    ""value"": ""%streetaddress""
+    //                },   
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/city"",
+    //                    ""value"": ""%city""
+    //                },   
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/postalcode"",
+    //                    ""value"": ""%postalcode""
+    //                },             
+    //                {
+    //                    ""uri"": ""http://wso2.org/claims/country"",
+    //                    ""value"": ""%country""
+    //                }
+    //            ]
+    //        },
+    //        ""properties"": [],
+    //        ""DuplicateHandling"": ""%DuplicateHandling"",
+    //        ""AuthenticationMethod"": ""%AuthenticationMethod""
+    //    }";
+
+    //    string requestTemplatePart = string.Empty;
+    //    string requestTemplateFinal = requestTemplate;
+
+    //    foreach (var itemParameter in TestCombinationParameterList)
+    //    {
+    //        TestCombinationParameter TestCombinationParameter = (TestCombinationParameter)itemParameter;
+    //        string parameterName = TestCombinationParameter.ParameterName;
+    //        string parameterValue = TestCombinationParameter.ParameterValue;
+
+    //        string forChange = "%" + parameterName;
+    //        requestTemplatePart = requestTemplateFinal.Replace(forChange, parameterValue);
+    //        requestTemplateFinal = requestTemplatePart;
+    //    }
+
+    //    log.Info("requestTemplate: " + requestTemplateFinal);
+
+    //string jsonRegisterUser = ApiUtils.GetRegisterUserJson(item.Username, item.Realm, item.Password, item.Externalid, item.Givenname, item.Lastname, item.Emailaddress, item.DOB, item.Placeofbirth, item.Gender, item.Streetaddress, item.City, item.Postalcode, item.Country);
+    //string jsonRegisterUser = ApiUtils.GetRegisterUserJson(item_Username, item_Realm, item_Password, item_Externalid, item_Givenname, item_Lastname, item_Emailaddress, item_DOB, item_Placeofbirth, item_Gender, item_Streetaddress, item_City, item_Postalcode, item_Country);
+
+    //}
 }

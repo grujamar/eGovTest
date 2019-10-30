@@ -166,7 +166,187 @@ public class ProjectUtility
     }
 
 
+    public List<TestSessionRequestsParameters> spCreateTestSessionRequests(int MethodId)
+    {
+        List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
 
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand("spCreateTestSessionRequests", objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    objCmd.Parameters.Add("@MethodId", System.Data.SqlDbType.Int).Value = MethodId;
+
+                    objCmd.Parameters.Add("@result", System.Data.SqlDbType.Int);
+                    objCmd.Parameters["@result"].Direction = ParameterDirection.ReturnValue;
+
+                    objConn.Open();
+                    SqlDataReader reader = objCmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        int TestCombinationId = reader.GetInt32(0);
+                        int TestSessionId = reader.GetInt32(1);
+                        string RequestData = reader.GetSqlString(2).ToString();
+
+                        TestSessionRequestsParameters testCombination = new TestSessionRequestsParameters(TestCombinationId, TestSessionId, RequestData);
+                        TestSessionRequestsParameterList.Add(testCombination);
+                    }
+
+                    int result = Convert.ToInt32(objCmd.Parameters["@result"].Value);
+                    if (!result.Equals(0))
+                    {
+                        throw new Exception(result.ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
+        }
+
+        return TestSessionRequestsParameterList;
+    }
+
+
+    public void testSessionStart(int TestSessionId, out int result)
+    {
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand("spTestSessionStart", objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = CommandType.StoredProcedure;
+
+                    objCmd.Parameters.Add("@TestSessionId", System.Data.SqlDbType.Int).Value = TestSessionId;
+
+                    objCmd.Parameters.Add("@err", System.Data.SqlDbType.Int);
+                    objCmd.Parameters["@err"].Direction = ParameterDirection.ReturnValue;
+
+                    objConn.Open();
+                    objCmd.ExecuteNonQuery();
+
+                    //Retrieve the value of the output parameter
+                    result = Convert.ToInt32(objCmd.Parameters["@err"].Value);
+
+                    objConn.Close();
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in function testSessionStart. " + ex.Message);
+                    throw new Exception("Error in function testSessionStart. " + ex.Message);
+                }
+            }
+        }
+    }
+
+
+    public void testSessionFinish(int TestSessionId, out int result)
+    {
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand("spTestSessionFinish", objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = CommandType.StoredProcedure;
+
+                    objCmd.Parameters.Add("@TestSessionId", System.Data.SqlDbType.Int).Value = TestSessionId;
+
+                    objCmd.Parameters.Add("@err", System.Data.SqlDbType.Int);
+                    objCmd.Parameters["@err"].Direction = ParameterDirection.ReturnValue;
+
+                    objConn.Open();
+                    objCmd.ExecuteNonQuery();
+
+                    //Retrieve the value of the output parameter
+                    result = Convert.ToInt32(objCmd.Parameters["@err"].Value);
+
+                    objConn.Close();
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in function testSessionFinish. " + ex.Message);
+                    throw new Exception("Error in function testSessionFinish. " + ex.Message);
+                }
+            }
+        }
+    }
+
+    public void testCombinationStart(int TestCombinationId, out int result)
+    {
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand("spTestCombinationStart", objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = CommandType.StoredProcedure;
+
+                    objCmd.Parameters.Add("@TestCombinationId", System.Data.SqlDbType.Int).Value = TestCombinationId;
+
+                    objCmd.Parameters.Add("@err", System.Data.SqlDbType.Int);
+                    objCmd.Parameters["@err"].Direction = ParameterDirection.ReturnValue;
+
+                    objConn.Open();
+                    objCmd.ExecuteNonQuery();
+
+                    //Retrieve the value of the output parameter
+                    result = Convert.ToInt32(objCmd.Parameters["@err"].Value);
+
+                    objConn.Close();
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in function testCombinationStart. " + ex.Message);
+                    throw new Exception("Error in function testCombinationStart. " + ex.Message);
+                }
+            }
+        }
+    }
+
+
+    public void testCombinationFinish(int TestCombinationId, string Response, string ResponseStatus, string ResponseExternal, string ResponseStatusExternal, bool FinalOutcome, out int result)
+    {
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand("spTestCombinationFinish", objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = CommandType.StoredProcedure;
+
+                    objCmd.Parameters.Add("@TestCombinationId", System.Data.SqlDbType.Int).Value = TestCombinationId;
+                    objCmd.Parameters.AddWithValue("@Response", Response);
+                    objCmd.Parameters.AddWithValue("@ResponseStatus", ResponseStatus);
+                    objCmd.Parameters.AddWithValue("@ResponseExternal", ResponseExternal);
+                    objCmd.Parameters.AddWithValue("@ResponseStatusExternal", ResponseStatusExternal);
+                    objCmd.Parameters.Add("@FinalOutcome", SqlDbType.Bit).Value = FinalOutcome;
+
+                    objCmd.Parameters.Add("@err", System.Data.SqlDbType.Int);
+                    objCmd.Parameters["@err"].Direction = ParameterDirection.ReturnValue;
+
+                    objConn.Open();
+                    objCmd.ExecuteNonQuery();
+
+                    //Retrieve the value of the output parameter
+                    result = Convert.ToInt32(objCmd.Parameters["@err"].Value);
+
+                    objConn.Close();
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in function testCombinationFinish. " + ex.Message);
+                    throw new Exception("Error in function testCombinationFinish. " + ex.Message);
+                }
+            }
+        }
+    }
 
     public int getMethodID(string MethodName)
     {

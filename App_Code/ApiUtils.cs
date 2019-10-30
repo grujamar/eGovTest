@@ -148,30 +148,57 @@ public static class ApiUtils
     public static string SCIMcheckData_BasicAuth = String.Concat(SCIMcheckData_Username_Out, SCIMcheckData_Password_Out);
 
 
-    public static string RegisterUserWebRequestCall(string data)
+    public static string RegisterUserWebRequestCall(string data, out string resultFinalRegisterUserWebRequestCall, out string StatusCodeFinalRegisterUserWebRequestCall, out string StatusDescriptionFinalRegisterUserWebRequestCall, out string resultFinalNotOK)
     {
-        return WebRequestCall(data, RegisterUser_Url_Out, RegisterUser_Method_Out, RegisterUser_ContentType_Out, RegisterUser_BasicAuth, out string resultFinal);
-    }
-
-    public static string SearchUserIDByUsernameWebRequestCall(string data, string username, out string resultFinalSearchUserIDByUsername)
-    {
-        resultFinalSearchUserIDByUsername = string.Empty;
-        string WebCall = WebRequestCall(data, (SearchUserIDByUsername_Url_Out + username), SearchUserIDByUsername_Method_Out, SearchUserIDByUsername_ContentType_Out, SearchUserIDByUsername_BasicAuth, out string resultFinal);
-        resultFinalSearchUserIDByUsername = resultFinal;
+        StatusCodeFinalRegisterUserWebRequestCall = string.Empty;
+        StatusDescriptionFinalRegisterUserWebRequestCall = string.Empty;
+        resultFinalRegisterUserWebRequestCall = string.Empty;
+        resultFinalNotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, RegisterUser_Url_Out, RegisterUser_Method_Out, RegisterUser_ContentType_Out, RegisterUser_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        StatusCodeFinalRegisterUserWebRequestCall = StatusCodeFinal;
+        StatusDescriptionFinalRegisterUserWebRequestCall = StatusDescriptionFinal;
+        resultFinalRegisterUserWebRequestCall = resultFinal;
+        resultFinalNotOK = resultFinalBad;
         return WebCall;
     }
 
-    public static string SCIMcheckDataWebRequestCall(string data, string UserID, out string resultFinalSCIMcheckData)
+    public static string SearchUserIDByUsernameWebRequestCall(string data, string username, out string resultFinalSearchUserIDByUsername, out string StatusCodeFinalSearchUserIDByUsername, out string StatusDescriptionFinalSearchUserIDByUsername, out string resultFinalNotOK)
     {
+        StatusCodeFinalSearchUserIDByUsername = string.Empty;
+        StatusDescriptionFinalSearchUserIDByUsername = string.Empty;
+        resultFinalSearchUserIDByUsername = string.Empty;
+        resultFinalNotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, (SearchUserIDByUsername_Url_Out + username), SearchUserIDByUsername_Method_Out, SearchUserIDByUsername_ContentType_Out, SearchUserIDByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        StatusCodeFinalSearchUserIDByUsername = StatusCodeFinal;
+        StatusDescriptionFinalSearchUserIDByUsername = StatusDescriptionFinal;
+        resultFinalSearchUserIDByUsername = resultFinal;
+        resultFinalNotOK = resultFinalBad;
+        return WebCall;
+    }
+
+    public static string SCIMcheckDataWebRequestCall(string data, string UserID, out string resultFinalSCIMcheckData, out string StatusCodeFinalSCIMcheckData, out string StatusDescriptionFinalSCIMcheckData, out string resultFinalNotOK)
+    {
+        StatusCodeFinalSCIMcheckData = string.Empty;
+        StatusDescriptionFinalSCIMcheckData = string.Empty;
         resultFinalSCIMcheckData = string.Empty;
-        string WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal);
+        resultFinalNotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        StatusCodeFinalSCIMcheckData = StatusCodeFinal;
+        StatusDescriptionFinalSCIMcheckData = StatusDescriptionFinal;
         resultFinalSCIMcheckData = resultFinal;
+        resultFinalNotOK = resultFinalBad;
         return resultFinalSCIMcheckData;
     }
 
 
-    public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal)
+    public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalNotOK)
     {
+        StatusCodeFinal = string.Empty;
+        StatusDescriptionFinal = string.Empty;
+        resultFinalNotOK = string.Empty;
         string result = string.Empty;
         resultFinal = string.Empty;
         try
@@ -199,7 +226,6 @@ public static class ApiUtils
             { 
                 using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
                 {
-                    log.Info("Json data for Register user " + data);
                     streamWriter.Write(data);
                 }
             }
@@ -207,7 +233,9 @@ public static class ApiUtils
             try
             {
                 var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-                GetStatusAndDescriptionCode(httpResponse);
+                GetStatusAndDescriptionCode(httpResponse, out string StatusCode, out string StatusDescription);
+                StatusCodeFinal = StatusCode;
+                StatusDescriptionFinal = StatusDescription;
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
                 {
                     var res = streamReader.ReadToEnd();
@@ -222,25 +250,28 @@ public static class ApiUtils
                 using (WebResponse response = ex.Response)
                 { 
                     HttpWebResponse httpResponse1 = (HttpWebResponse)response;
-                    GetStatusAndDescriptionCode(httpResponse1);
-
+                    GetStatusAndDescriptionCode(httpResponse1, out string StatusCode, out string StatusDescription);
+                    StatusCodeFinal = StatusCode;
+                    StatusDescriptionFinal = StatusDescription;
                     using (var stream = ex.Response.GetResponseStream())
                     using (var reader = new StreamReader(stream))
                     {
                         result = reader.ReadToEnd();
+                        resultFinalNotOK = result;
                         log.Info("Web exception message: " + result);
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception("Error getting result: " + ex.Message + " ||| " + ex.InnerException + " ||| " + ex.StackTrace);
+                log.Error("Error getting result: " + ex.Message + " ||| " + ex.InnerException + " ||| " + ex.StackTrace);
+                //throw new Exception("Error getting result: " + ex.Message + " ||| " + ex.InnerException + " ||| " + ex.StackTrace);
             }
         }
         catch (Exception ex)
         {
             log.Error("Error in function WebRequestCall. " + ex.Message);
-            throw new Exception("Error in function WebRequestCall. " + ex.Message);
+            //throw new Exception("Error in function WebRequestCall. " + ex.Message);
         }
         return result;
     }
@@ -251,23 +282,23 @@ public static class ApiUtils
         return true;
     }
 
-
-
-    public static void GetStatusAndDescriptionCode(HttpWebResponse httpResponse)
+    public static void GetStatusAndDescriptionCode(HttpWebResponse httpResponse, out string StatusCodeFinal, out string StatusDescriptionFinal)
     {
+        StatusCodeFinal = string.Empty;
         int StatusCode = Convert.ToInt32(httpResponse.StatusCode);
+        StatusCodeFinal = StatusCode.ToString();
+
+        StatusDescriptionFinal = string.Empty;
         string StatusDecription = httpResponse.StatusDescription;
+        StatusDescriptionFinal = StatusDecription;
         log.Info("Status code is " + StatusCode);
         log.Info("Status desctiption is " + StatusDecription);
     }
 
-    public static string GetRegisterUserJson(string item_Username, string item_Realm, string item_Password, string item_Externalid, string item_Givenname, string item_Lastname, string item_Emailaddress, string item_DOB, string item_Placeofbirth, string item_Gender, string item_Streetaddress, string item_City, string item_Postalcode, string item_Country)
-    {
-        return "{\"user\":{\"username\":\"" + item_Username + "\"," + "\"realm\":\"" + item_Realm + "\"," + "\"password\":\"" + item_Password + "\"," + "\"claims\":[{\"uri\":\"" + ConstantsProject.CLAIMS_URI_EXTERNALID + "\"," + "\"value\":\"" + item_Externalid + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_GIVENNAME + "\"," + "\"value\":\"" + item_Givenname + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_LASTNAME + "\"," + "\"value\":\"" + item_Lastname + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_EMAILADDRESS + "\"," + "\"value\":\"" + item_Emailaddress + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_DOB + "\"," + "\"value\":\"" + item_DOB + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_PLACEOFBIRTH + "\"," + "\"value\":\"" + item_Placeofbirth + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_GENDER + "\"," + "\"value\":\"" + item_Gender + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_STREETADDRESS + "\"," + "\"value\":\"" + item_Streetaddress + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_CITY + "\"," + "\"value\":\"" + item_City + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_POSTALCODE + "\"," + "\"value\":\"" + item_Postalcode + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_COUNTRY + "\"," + "\"value\":\"" + item_Country + "\"}]}," + "\"properties\":[]," + "\"DuplicateHandling\":\"Merge\"," + "\"AuthenticationMethod\":\"PasswordAuthentication\"}";
-    }
-
-
-
+    //public static string GetRegisterUserJson(string item_Username, string item_Realm, string item_Password, string item_Externalid, string item_Givenname, string item_Lastname, string item_Emailaddress, string item_DOB, string item_Placeofbirth, string item_Gender, string item_Streetaddress, string item_City, string item_Postalcode, string item_Country)
+    //{
+    //    //return "{\"user\":{\"username\":\"" + item_Username + "\"," + "\"realm\":\"" + item_Realm + "\"," + "\"password\":\"" + item_Password + "\"," + "\"claims\":[{\"uri\":\"" + ConstantsProject.CLAIMS_URI_EXTERNALID + "\"," + "\"value\":\"" + item_Externalid + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_GIVENNAME + "\"," + "\"value\":\"" + item_Givenname + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_LASTNAME + "\"," + "\"value\":\"" + item_Lastname + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_EMAILADDRESS + "\"," + "\"value\":\"" + item_Emailaddress + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_DOB + "\"," + "\"value\":\"" + item_DOB + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_PLACEOFBIRTH + "\"," + "\"value\":\"" + item_Placeofbirth + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_GENDER + "\"," + "\"value\":\"" + item_Gender + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_STREETADDRESS + "\"," + "\"value\":\"" + item_Streetaddress + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_CITY + "\"," + "\"value\":\"" + item_City + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_POSTALCODE + "\"," + "\"value\":\"" + item_Postalcode + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_COUNTRY + "\"," + "\"value\":\"" + item_Country + "\"}]}," + "\"properties\":[]," + "\"DuplicateHandling\":\"Merge\"," + "\"AuthenticationMethod\":\"PasswordAuthentication\"}";
+    //}
 
     /*VALIDATION*/
     public static bool ValidateDropDown(string SelectedValue, string IDItem, string ddlName, out string ErrorMessage)
