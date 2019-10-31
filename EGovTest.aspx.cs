@@ -37,7 +37,7 @@ public partial class EGovTest : System.Web.UI.Page
             log.Info(pageName + " page start.");
             ChangeVisibility(true);
             Session["EGovTest_ddlSelectedValue"] = 0;
-        }     
+        }
     }
 
     private void AvoidCashing()
@@ -49,7 +49,6 @@ public partial class EGovTest : System.Web.UI.Page
     protected void ChangeVisibility(bool visible)
     {
         afterCreateTest.Visible = !visible;
-        //afterCreateTest.Visible = visible;
         beforeCreateTest.Visible = visible;
     }
 
@@ -65,7 +64,7 @@ public partial class EGovTest : System.Web.UI.Page
                 ProjectUtility utility = new ProjectUtility();
                 List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
                 log.Info("Start prepared Requests for test. ");
-                PreparedRequestsForTests(utility, out TestSessionRequestsParameterList);
+                PreparedRequestsForTest(utility, out TestSessionRequestsParameterList);
                 log.Info("End prepared Requests for test. ");
             }
         }
@@ -76,6 +75,31 @@ public partial class EGovTest : System.Web.UI.Page
         }
     }
 
+    protected void PreparedRequestsForTest(ProjectUtility utility, out List<TestSessionRequestsParameters> TestSessionRequestsParameterFinal)
+    {
+        TestSessionRequestsParameterFinal = new List<TestSessionRequestsParameters>();
+        try
+        {
+            List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
+
+            TestSessionRequestsParameterList = utility.spCreateTestSessionRequests(Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]));
+
+            if (TestSessionRequestsParameterList.Count > 0)
+            {
+                Session["EGovTest_TestSessionRequestsParameterList"] = TestSessionRequestsParameterList;
+                ChangeVisibility(false);
+            }
+
+            TestSessionRequestsParameterFinal = TestSessionRequestsParameterList;
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error on PreparedRequestsForTests. " + ex.Message);
+            ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
+        }
+
+    }
+
     protected void btnStartTest_Click(object sender, EventArgs e)
     {
         try
@@ -83,13 +107,18 @@ public partial class EGovTest : System.Web.UI.Page
             int methodID = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
             switch (methodID)
             {
-                case 2:
+                case ConstantsProject.REGISTER_USER_ID:
                     log.Info("Start Register user. ");
                     RegisterUserAutoTest();
                     log.Info("End Register user. ");
                     break;
+                case ConstantsProject.VALIDATE_CODE_USER_ID:
+                    log.Info("Start Validate code. ");
+                    ValidateCodeAutoTest();
+                    log.Info("End Validate code. ");
+                    break;
                 case 5:
-                    Console.WriteLine(5);
+                    
                     break;
             }
 
@@ -103,84 +132,12 @@ public partial class EGovTest : System.Web.UI.Page
     }
 
 
-    protected void PreparedRequestsForTests(ProjectUtility utility, out List<TestSessionRequestsParameters> TestSessionRequestsParameterFinal)
-    {
-        TestSessionRequestsParameterFinal = new List<TestSessionRequestsParameters>();
-        try
-        {
-            List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
-
-            TestSessionRequestsParameterList = utility.spCreateTestSessionRequests(Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]));
-
-            if (TestSessionRequestsParameterList.Count>0)
-            {
-                Session["EGovTest_TestSessionRequestsParameterList"] = TestSessionRequestsParameterList;
-                ChangeVisibility(false);
-            }
-
-            TestSessionRequestsParameterFinal = TestSessionRequestsParameterList;
-        }
-        catch (Exception ex)
-        {
-            log.Error("Error on PreparedRequestsForTests. " + ex.Message);
-            ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
-        }
-        
-    }
-
     protected void RegisterUserAutoTest()
     {
         try
         {
-            int result = 0;
-            ProjectUtility utility = new ProjectUtility();
-            List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
-            TestSessionRequestsParameterList = (List<TestSessionRequestsParameters>)Session["EGovTest_TestSessionRequestsParameterList"];
-            log.Debug("TestCombinationList length: " + TestSessionRequestsParameterList.Count);
-
-            //get TestSessionId from first object poarameter
-            var firstElement = TestSessionRequestsParameterList.First();
-            int TestSessionId = firstElement.TestSessionId;
-            log.Info("TestSessionId is: " + TestSessionId);
-            utility.testSessionStart(TestSessionId, out result);
-            if (result != 0)
-            {
-                throw new Exception("Error while trying to start test session. Result is: " + result);
-            }
-
-            try
-            {
-                foreach (var item in TestSessionRequestsParameterList)
-                {
-                    log.Info("item.RequestData is " + item.RequestData);
-                    utility.testCombinationStart(item.TestCombinationId, out result);
-                    if (result != 0)
-                    {
-                        throw new Exception("Error while trying to start combination. Result is: " + result);
-                    }
-
-                    string username = string.Empty;
-                    username = ParseRequestForUsername(item.RequestData);
-                    WebAPICalls(item.RequestData, username, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome);
-
-                    log.Info("testCombinationFinish with parameters: " + " RequestData - " + item.RequestData + " Response - " + Response + " ResponseStatus - " + ResponseStatus + " ResponseExternal - " + ResponseExternal + " ResponseStatusExternal - " + ResponseStatusExternal + " FinalOutcome - " + FinalOutcome);
-                    utility.testCombinationFinish(item.TestCombinationId, Response, ResponseStatus, ResponseExternal, ResponseStatusExternal, FinalOutcome, out result);
-                    if (result != 0)
-                    {
-                        throw new Exception("Error while trying to end combination. Result is: " + result);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error. " + ex.Message);
-            }
-
-            utility.testSessionFinish(TestSessionId, out result);
-            if (result != 0)
-            {
-                throw new Exception("Error while trying to finish test session. Result is: " + result);
-            }
+            int methodID_RegisterUser = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
+            WebApiCallsByMethod(methodID_RegisterUser);
         }
         catch (Exception ex)
         {
@@ -188,7 +145,119 @@ public partial class EGovTest : System.Web.UI.Page
         }
     }
 
-    protected void WebAPICalls(string jsonData, string Username, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+
+    protected void ValidateCodeAutoTest()
+    {
+        try
+        {
+            int methodID_ValidateCode = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
+            WebApiCallsByMethod(methodID_ValidateCode);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in function ValidateCodeAutoTest. " + ex.Message);
+        }
+    }
+
+
+    protected void WebApiCallsByMethod(int MethodId)
+    {
+        int result = 0;
+        ProjectUtility utility = new ProjectUtility();
+        List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
+        TestSessionRequestsParameterList = (List<TestSessionRequestsParameters>)Session["EGovTest_TestSessionRequestsParameterList"];
+        log.Info("TestCombinationList length: " + TestSessionRequestsParameterList.Count);
+
+        //get TestSessionId from first object poarameter
+        var firstElement = TestSessionRequestsParameterList.First();
+        int TestSessionId = firstElement.TestSessionId;
+        log.Info("TestSessionId is: " + TestSessionId);
+        utility.testSessionStart(TestSessionId, out result);
+        if (result != 0)
+        {
+            throw new Exception("Error while trying to start test session. Result is: " + result);
+        }
+
+        try
+        {
+            foreach (var item in TestSessionRequestsParameterList)
+            {
+                log.Info("item.RequestData is " + item.RequestData);
+                utility.testCombinationStart(item.TestCombinationId, out result);
+                if (result != 0)
+                {
+                    throw new Exception("Error while trying to start combination. Result is: " + result);
+                }
+
+                string username = string.Empty;
+                if (MethodId == ConstantsProject.REGISTER_USER_ID)
+                {
+                    username = ParseRequestForUsername(item.RequestData);
+                }
+                WebAPICalls(item.RequestData, username, MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome);
+
+                log.Info("testCombinationFinish with parameters: " + " RequestData - " + item.RequestData + " Response - " + Response + " ResponseStatus - " + ResponseStatus + " ResponseExternal - " + ResponseExternal + " ResponseStatusExternal - " + ResponseStatusExternal + " FinalOutcome - " + FinalOutcome);
+                utility.testCombinationFinish(item.TestCombinationId, Response, ResponseStatus, ResponseExternal, ResponseStatusExternal, FinalOutcome, out result);
+                if (result != 0)
+                {
+                    throw new Exception("Error while trying to end combination. Result is: " + result);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error. " + ex.Message);
+        }
+
+        utility.testSessionFinish(TestSessionId, out result);
+        if (result != 0)
+        {
+            throw new Exception("Error while trying to finish test session. Result is: " + result);
+        }
+    }
+
+    protected void WebAPICalls(string jsonData, string Username, int MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    {
+        string ResponseEnd = string.Empty;
+        string ResponseStatusEnd = string.Empty;
+        string ResponseExternalEnd = string.Empty;
+        string ResponseStatusExternalEnd = string.Empty;
+        bool FinalOutcomeEnd = false;
+
+        try
+        {
+            switch (MethodId)
+            {
+                case ConstantsProject.REGISTER_USER_ID:
+                    log.Info("Start RegisterUser_WebAPICalls. ");
+                    RegisterUser_WebAPICalls(jsonData, Username, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End RegisterUser_WebAPICalls. ");
+                    break;
+                case ConstantsProject.VALIDATE_CODE_USER_ID:
+                    log.Info("Start ValidateCode_WebAPICalls. ");
+                    ValidateCode_WebAPICalls(jsonData, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End ValidateCode_WebAPICalls. ");
+                    break;
+                case 5:
+
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error in function WebAPICalls. " + ex.Message);
+            //throw new Exception("Error in function WebAPICalls. " + ex.Message);
+        }
+
+        Response = ResponseEnd;
+        ResponseStatus = ResponseStatusEnd;
+        ResponseExternal = ResponseExternalEnd;
+        ResponseStatusExternal = ResponseStatusExternalEnd;
+        FinalOutcome = FinalOutcomeEnd;
+    }
+
+
+    protected void RegisterUser_WebAPICalls(string jsonData, string Username, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
     {
         Response = string.Empty;
         ResponseStatus = string.Empty;
@@ -202,14 +271,15 @@ public partial class EGovTest : System.Web.UI.Page
         {
             //Register user API start
             log.Info("Register user API start. ");
-            string RegisterUser_Response = ApiUtils.RegisterUserWebRequestCall(jsonData, out string resultResponse, out string statusCode, out string statusDescription, out string resulNotOK);
+            string RegisterUser_Response = ApiUtils.RegisterUser_WebRequestCall(jsonData, out string resultResponse, out string statusCode, out string statusDescription, out string resulNotOK);
             ResponseStatus = statusCode + " " + statusDescription;
             if (Convert.ToInt32(statusCode) == ConstantsProject.REGISTER_USER_ОК)
             {
                 FinalOutcomeFirstStep = true;
                 Response = resultResponse;
             }
-            else {
+            else
+            {
                 Response = resulNotOK;
             }
             log.Info("Register user API end. Response result is: " + Response + " " + ResponseStatus);
@@ -217,7 +287,7 @@ public partial class EGovTest : System.Web.UI.Page
             log.Info("Start SearchUserIDByUsername ");
             string resultFinalSearchUserIDByUsername = string.Empty;
             //todo string.empty   item.Username
-            string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsernameWebRequestCall(string.Empty, Username, out resultFinalSearchUserIDByUsername, out string statusCodeSearch, out string statusDescriptionSearch, out string resulNotOKsearch);
+            string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsername_WebRequestCall(string.Empty, Username, out resultFinalSearchUserIDByUsername, out string statusCodeSearch, out string statusDescriptionSearch, out string resulNotOKsearch);
             string UserId = ParseResponse(resultFinalSearchUserIDByUsername);
             log.Info("End SearchUserIDByUsername. Response result is: " + UserId);
 
@@ -225,7 +295,7 @@ public partial class EGovTest : System.Web.UI.Page
             {
                 log.Info("Start calling SCIM web service. ");
                 string resultFinalSCIMcheckData = string.Empty;
-                string SCIMcheckData_Response = ApiUtils.SCIMcheckDataWebRequestCall(string.Empty, UserId, out resultFinalSCIMcheckData, out string statusCodeSCIM, out string statusDescriptionSCIM, out string resultNotOKscim);
+                string SCIMcheckData_Response = ApiUtils.SCIMcheckData_WebRequestCall(string.Empty, UserId, out resultFinalSCIMcheckData, out string statusCodeSCIM, out string statusDescriptionSCIM, out string resultNotOKscim);
                 ResponseExternal = resultFinalSCIMcheckData;
                 ResponseStatusExternal = statusCodeSCIM + " " + statusDescriptionSCIM;
                 if (Convert.ToInt32(statusCode) == ConstantsProject.REGISTER_USER_SCIM_ОК)
@@ -236,16 +306,48 @@ public partial class EGovTest : System.Web.UI.Page
 
 
                 FinalOutcome = CheckFinalOutcome(FinalOutcomeFirstStep, FinalOutcomeSecondStep);
-                log.Info("FinalOutcome is - " + FinalOutcome); 
+                log.Info("FinalOutcome is - " + FinalOutcome);
             }
         }
         catch (Exception ex)
         {
-            log.Error("Error in function WebAPICalls. " + ex.Message);
-            //throw new Exception("Error in function WebAPICalls. " + ex.Message);
+            log.Error("Error in function RegisterUser_WebAPICalls. " + ex.Message);
         }
     }
 
+    protected void ValidateCode_WebAPICalls(string jsonData, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    {
+        Response = string.Empty;
+        ResponseStatus = string.Empty;
+        ResponseExternal = string.Empty;
+        ResponseStatusExternal = string.Empty;
+        FinalOutcome = false;
+        bool FinalOutcomeFirstStep = false;
+
+        try
+        {
+            log.Info("Validate code API start. ");
+            string ValidateCode_Response = ApiUtils.ValidateCode_WebRequestCall(jsonData, out string resultResponse, out string statusCode, out string statusDescription, out string resulNotOK);
+            ResponseStatus = statusCode + " " + statusDescription;
+            if (Convert.ToInt32(statusCode) == ConstantsProject.VALIDATE_CODE_ОК)
+            {
+                FinalOutcomeFirstStep = true;
+                Response = resultResponse;
+            }
+            else
+            {
+                Response = resulNotOK;
+            }
+            log.Info("Validate code API end. Response result is: " + Response + " " + ResponseStatus);
+
+            FinalOutcome = FinalOutcomeFirstStep;
+            log.Info("FinalOutcome is - " + FinalOutcome);
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error in function ValidateCode_WebAPICalls. " + ex.Message);
+        }
+    }
 
     protected bool CheckFinalOutcome(bool firstStep, bool secondStep)
     {
@@ -259,6 +361,7 @@ public partial class EGovTest : System.Web.UI.Page
         }
         return retValue;
     }
+
 
     protected string ParseResponse(string jsonResponse)
     {

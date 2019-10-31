@@ -21,4 +21,11 @@
     <username>admin@wso2.com</username>
     <password>admin</password>
   </SCIMcheckData>
+  <ValidateCode>
+    <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/validate-code</url>
+    <contentType>application/json</contentType>
+    <method>POST</method>
+    <username></username>
+    <password></password>
+  </ValidateCode>
 </parameters>

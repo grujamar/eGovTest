@@ -29,7 +29,11 @@ public static class ApiUtils
     public static string SCIMcheckData_Method_Out { get; set; }
     public static string SCIMcheckData_Username_Out { get; set; }
     public static string SCIMcheckData_Password_Out { get; set; }
-
+    public static string ValidateCode_Url_Out { get; set; }
+    public static string ValidateCode_ContentType_Out { get; set; }
+    public static string ValidateCode_Method_Out { get; set; }
+    public static string ValidateCode_Username_Out { get; set; }
+    public static string ValidateCode_Password_Out { get; set; }
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -88,6 +92,18 @@ public static class ApiUtils
                         SCIMcheckData_Method_Out = SCIMcheckData_Method_Out_Final;
                         SCIMcheckData_Username_Out = SCIMcheckData_Username_Out_Final;
                         SCIMcheckData_Password_Out = SCIMcheckData_Password_Out_Final;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigator.MoveToNext();
+                        navigator.MoveToNext();
+                    }
+                    if (navigator.Name == "ValidateCode")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string ValidateCode_Url_Out_Final, out string ValidateCode_ContentType_Out_Final, out string ValidateCode_Method_Out_Final, out string ValidateCode_Username_Out_Final, out string ValidateCode_Password_Out_Final);
+                        ValidateCode_Url_Out = ValidateCode_Url_Out_Final;
+                        ValidateCode_ContentType_Out = ValidateCode_ContentType_Out_Final;
+                        ValidateCode_Method_Out = ValidateCode_Method_Out_Final;
+                        ValidateCode_Username_Out = ValidateCode_Username_Out_Final;
+                        ValidateCode_Password_Out = ValidateCode_Password_Out_Final;
                     }
                 } while (navigator.MoveToNext());
             }
@@ -146,59 +162,82 @@ public static class ApiUtils
     public static string RegisterUser_BasicAuth = RegisterUser_Username_Out + ":" + RegisterUser_Password_Out;
     public static string SearchUserIDByUsername_BasicAuth = SearchUserIDByUsername_Username_Out + ":" + SearchUserIDByUsername_Password_Out;
     public static string SCIMcheckData_BasicAuth = String.Concat(SCIMcheckData_Username_Out, SCIMcheckData_Password_Out);
+    public static string ValidateCode_BasicAuth = ValidateCode_Username_Out + ":" + ValidateCode_Password_Out;
 
-
-    public static string RegisterUserWebRequestCall(string data, out string resultFinalRegisterUserWebRequestCall, out string StatusCodeFinalRegisterUserWebRequestCall, out string StatusDescriptionFinalRegisterUserWebRequestCall, out string resultFinalNotOK)
+    public static string RegisterUser_WebRequestCall(string data, out string result_Final_RegisterUser, out string StatusCode_Final_RegisterUser, out string StatusDescription_Final_RegisterUser, out string result_Final_NotOK)
     {
-        StatusCodeFinalRegisterUserWebRequestCall = string.Empty;
-        StatusDescriptionFinalRegisterUserWebRequestCall = string.Empty;
-        resultFinalRegisterUserWebRequestCall = string.Empty;
-        resultFinalNotOK = string.Empty;
+        StatusCode_Final_RegisterUser = string.Empty;
+        StatusDescription_Final_RegisterUser = string.Empty;
+        result_Final_RegisterUser = string.Empty;
+        result_Final_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, RegisterUser_Url_Out, RegisterUser_Method_Out, RegisterUser_ContentType_Out, RegisterUser_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
-        StatusCodeFinalRegisterUserWebRequestCall = StatusCodeFinal;
-        StatusDescriptionFinalRegisterUserWebRequestCall = StatusDescriptionFinal;
-        resultFinalRegisterUserWebRequestCall = resultFinal;
-        resultFinalNotOK = resultFinalBad;
+        /*******************************/
+        StatusCode_Final_RegisterUser = StatusCodeFinal;
+        StatusDescription_Final_RegisterUser = StatusDescriptionFinal;
+        result_Final_RegisterUser = resultFinal;
+        result_Final_NotOK = resultFinalBad;
+        /*******************************/
         return WebCall;
     }
 
-    public static string SearchUserIDByUsernameWebRequestCall(string data, string username, out string resultFinalSearchUserIDByUsername, out string StatusCodeFinalSearchUserIDByUsername, out string StatusDescriptionFinalSearchUserIDByUsername, out string resultFinalNotOK)
+    public static string SearchUserIDByUsername_WebRequestCall(string data, string username, out string result_Final_SearchUserIDByUsername, out string StatusCode_Final_SearchUserIDByUsername, out string StatusDescription_Final_SearchUserIDByUsername, out string result_Final_NotOK)
     {
-        StatusCodeFinalSearchUserIDByUsername = string.Empty;
-        StatusDescriptionFinalSearchUserIDByUsername = string.Empty;
-        resultFinalSearchUserIDByUsername = string.Empty;
-        resultFinalNotOK = string.Empty;
+        StatusCode_Final_SearchUserIDByUsername = string.Empty;
+        StatusDescription_Final_SearchUserIDByUsername = string.Empty;
+        result_Final_SearchUserIDByUsername = string.Empty;
+        result_Final_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, (SearchUserIDByUsername_Url_Out + username), SearchUserIDByUsername_Method_Out, SearchUserIDByUsername_ContentType_Out, SearchUserIDByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
-        StatusCodeFinalSearchUserIDByUsername = StatusCodeFinal;
-        StatusDescriptionFinalSearchUserIDByUsername = StatusDescriptionFinal;
-        resultFinalSearchUserIDByUsername = resultFinal;
-        resultFinalNotOK = resultFinalBad;
+        /*******************************/
+        StatusCode_Final_SearchUserIDByUsername = StatusCodeFinal;
+        StatusDescription_Final_SearchUserIDByUsername = StatusDescriptionFinal;
+        result_Final_SearchUserIDByUsername = resultFinal;
+        result_Final_NotOK = resultFinalBad;
+        /*******************************/
         return WebCall;
     }
 
-    public static string SCIMcheckDataWebRequestCall(string data, string UserID, out string resultFinalSCIMcheckData, out string StatusCodeFinalSCIMcheckData, out string StatusDescriptionFinalSCIMcheckData, out string resultFinalNotOK)
+    public static string SCIMcheckData_WebRequestCall(string data, string UserID, out string result_Final_SCIMcheckData, out string StatusCode_Final_SCIMcheckData, out string StatusDescription_Final_SCIMcheckData, out string result_Final_NotOK)
     {
-        StatusCodeFinalSCIMcheckData = string.Empty;
-        StatusDescriptionFinalSCIMcheckData = string.Empty;
-        resultFinalSCIMcheckData = string.Empty;
-        resultFinalNotOK = string.Empty;
+        StatusCode_Final_SCIMcheckData = string.Empty;
+        StatusDescription_Final_SCIMcheckData = string.Empty;
+        result_Final_SCIMcheckData = string.Empty;
+        result_Final_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
-        StatusCodeFinalSCIMcheckData = StatusCodeFinal;
-        StatusDescriptionFinalSCIMcheckData = StatusDescriptionFinal;
-        resultFinalSCIMcheckData = resultFinal;
-        resultFinalNotOK = resultFinalBad;
-        return resultFinalSCIMcheckData;
+        /*******************************/
+        StatusCode_Final_SCIMcheckData = StatusCodeFinal;
+        StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
+        result_Final_SCIMcheckData = resultFinal;
+        result_Final_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
+
+    public static string ValidateCode_WebRequestCall(string data, out string result_Final_ValidateCode, out string StatusCode_Final_ValidateCode, out string StatusDescription_Final_ValidateCode, out string resultFinal_NotOK)
+    {
+        result_Final_ValidateCode = string.Empty;
+        StatusCode_Final_ValidateCode = string.Empty;
+        StatusDescription_Final_ValidateCode = string.Empty;
+        resultFinal_NotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, ValidateCode_Url_Out, ValidateCode_Method_Out, ValidateCode_ContentType_Out, ValidateCode_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        result_Final_ValidateCode = resultFinal;
+        StatusCode_Final_ValidateCode = StatusCodeFinal;
+        StatusDescription_Final_ValidateCode = StatusDescriptionFinal;
+        resultFinal_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
     }
 
 
-    public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalNotOK)
+    public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
     {
         StatusCodeFinal = string.Empty;
         StatusDescriptionFinal = string.Empty;
-        resultFinalNotOK = string.Empty;
+        result_Final_NotOK = string.Empty;
         string result = string.Empty;
         resultFinal = string.Empty;
         try
@@ -257,7 +296,7 @@ public static class ApiUtils
                     using (var reader = new StreamReader(stream))
                     {
                         result = reader.ReadToEnd();
-                        resultFinalNotOK = result;
+                        result_Final_NotOK = result;
                         log.Info("Web exception message: " + result);
                     }
                 }
@@ -297,7 +336,7 @@ public static class ApiUtils
 
     //public static string GetRegisterUserJson(string item_Username, string item_Realm, string item_Password, string item_Externalid, string item_Givenname, string item_Lastname, string item_Emailaddress, string item_DOB, string item_Placeofbirth, string item_Gender, string item_Streetaddress, string item_City, string item_Postalcode, string item_Country)
     //{
-    //    //return "{\"user\":{\"username\":\"" + item_Username + "\"," + "\"realm\":\"" + item_Realm + "\"," + "\"password\":\"" + item_Password + "\"," + "\"claims\":[{\"uri\":\"" + ConstantsProject.CLAIMS_URI_EXTERNALID + "\"," + "\"value\":\"" + item_Externalid + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_GIVENNAME + "\"," + "\"value\":\"" + item_Givenname + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_LASTNAME + "\"," + "\"value\":\"" + item_Lastname + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_EMAILADDRESS + "\"," + "\"value\":\"" + item_Emailaddress + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_DOB + "\"," + "\"value\":\"" + item_DOB + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_PLACEOFBIRTH + "\"," + "\"value\":\"" + item_Placeofbirth + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_GENDER + "\"," + "\"value\":\"" + item_Gender + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_STREETADDRESS + "\"," + "\"value\":\"" + item_Streetaddress + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_CITY + "\"," + "\"value\":\"" + item_City + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_POSTALCODE + "\"," + "\"value\":\"" + item_Postalcode + "\"}," + "{\"uri\":\"" + ConstantsProject.CLAIMS_URI_COUNTRY + "\"," + "\"value\":\"" + item_Country + "\"}]}," + "\"properties\":[]," + "\"DuplicateHandling\":\"Merge\"," + "\"AuthenticationMethod\":\"PasswordAuthentication\"}";
+    //    return "{\"user\":{\"username\":\"" + item_Username + "\"," + "\"realm\":\"" + item_Realm + "\"," + "\"password\":\"" + item_Password + "\"," + "\"claims\":[{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_Externalid + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_Givenname + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_Lastname + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_Emailaddress + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_DOB + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_Placeofbirth + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_Gender + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_Streetaddress + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_City + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_Postalcode + "\"}," + "{\"uri\":\"" + string.Empty + "\"," + "\"value\":\"" + item_Country + "\"}]}," + "\"properties\":[]," + "\"DuplicateHandling\":\"Merge\"," + "\"AuthenticationMethod\":\"PasswordAuthentication\"}";
     //}
 
     /*VALIDATION*/
