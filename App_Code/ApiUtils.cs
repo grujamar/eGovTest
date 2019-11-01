@@ -198,18 +198,45 @@ public static class ApiUtils
         return WebCall;
     }
 
-    public static string SCIMcheckData_WebRequestCall(string data, string UserID, out string result_Final_SCIMcheckData, out string StatusCode_Final_SCIMcheckData, out string StatusDescription_Final_SCIMcheckData, out string result_Final_NotOK)
+    public static string SCIMcheckData_WebRequestCall(string data, string UserID, string Method, out string result_Final_SCIMcheckData, out string StatusCode_Final_SCIMcheckData, out string StatusDescription_Final_SCIMcheckData, out string result_Final_NotOK)
     {
         StatusCode_Final_SCIMcheckData = string.Empty;
         StatusDescription_Final_SCIMcheckData = string.Empty;
         result_Final_SCIMcheckData = string.Empty;
         result_Final_NotOK = string.Empty;
         /*******************************/
-        string WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        if (Method == ConstantsProject.DELETE_METHOD)
+        {
+            string WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), Method, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            StatusCode_Final_SCIMcheckData = StatusCodeFinal;
+            StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
+            result_Final_SCIMcheckData = resultFinal;
+            result_Final_NotOK = resultFinalBad;
+            return WebCall;
+        }
+        else
+        {
+            string WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            StatusCode_Final_SCIMcheckData = StatusCodeFinal;
+            StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
+            result_Final_SCIMcheckData = resultFinal;
+            result_Final_NotOK = resultFinalBad;
+            return WebCall;
+        }
+    }
+
+    public static string SCIMcheckData_WebRequestCall_All(string data, out string result_Final_SCIMcheckData_All, out string StatusCode_Final_SCIMcheckData_All, out string StatusDescription_Final_SCIMcheckData_All, out string result_Final_NotOK)
+    {
+        StatusCode_Final_SCIMcheckData_All = string.Empty;
+        StatusDescription_Final_SCIMcheckData_All = string.Empty;
+        result_Final_SCIMcheckData_All = string.Empty;
+        result_Final_NotOK = string.Empty;
         /*******************************/
-        StatusCode_Final_SCIMcheckData = StatusCodeFinal;
-        StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
-        result_Final_SCIMcheckData = resultFinal;
+        string WebCall = WebRequestCall(data, SCIMcheckData_Url_Out, SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        StatusCode_Final_SCIMcheckData_All = StatusCodeFinal;
+        StatusDescription_Final_SCIMcheckData_All = StatusDescriptionFinal;
+        result_Final_SCIMcheckData_All = resultFinal;
         result_Final_NotOK = resultFinalBad;
         /*******************************/
         return WebCall;

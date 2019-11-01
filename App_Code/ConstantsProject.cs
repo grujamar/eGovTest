@@ -9,6 +9,10 @@ public class ConstantsProject
     //public const int REGISTER_USER_METHOD = 2;
     public const string REGISTER_USER_NAME = "RegisterUser";
     /// <summary>
+    /// /
+    /// </summary>
+    public const string DELETE_METHOD = "DELETE";
+    /// <summary>
     /// FROM DATABASE
     /// </summary>
     public const int REGISTER_USER_ID = 2;
