@@ -191,8 +191,10 @@ public class ProjectUtility
                         int TestCombinationId = reader.GetInt32(0);
                         int TestSessionId = reader.GetInt32(1);
                         string RequestData = reader.GetSqlString(2).ToString();
+                        string BeforeStep = reader.GetSqlString(3).ToString();
+                        string AfterStep = reader.GetSqlString(4).ToString();
 
-                        TestSessionRequestsParameters testCombination = new TestSessionRequestsParameters(TestCombinationId, TestSessionId, RequestData);
+                        TestSessionRequestsParameters testCombination = new TestSessionRequestsParameters(TestCombinationId, TestSessionId, RequestData, BeforeStep, AfterStep);
                         TestSessionRequestsParameterList.Add(testCombination);
                     }
 

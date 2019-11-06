@@ -12,11 +12,14 @@ public class ConstantsProject
     /// /
     /// </summary>
     public const string DELETE_METHOD = "DELETE";
+    public const string PUT_METHOD = "PUT";
     /// <summary>
     /// FROM DATABASE
     /// </summary>
     public const int REGISTER_USER_ID = 2;
-    public const int VALIDATE_CODE_USER_ID = 4;
+    public const int VALIDATE_CODE_METHOD_ID = 4;
+    public const int VALIDATE_USERNAME_METHOD_ID = 5;
+    public const int VALIDATE_UMCN_METHOD_ID = 6;
     /// <summary>
     /// ////////
     /// </summary>
@@ -26,4 +29,7 @@ public class ConstantsProject
 
     ////////////////////////////////////
     public const int VALIDATE_CODE_ОК = 202;
+    public const int VALIDATE_USERNAME_ОК = 200;
+
+    public const int VALIDATE_UMCN_ОК = 60000;
 }

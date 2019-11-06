@@ -11,11 +11,15 @@ public class TestSessionRequestsParameters
     public int TestCombinationId { get; set; }
     public int TestSessionId { get; set; }
     public string RequestData { get; set; }
+    public string BeforeStep { get; set; }
+    public string AfterStep { get; set; }
 
-    public TestSessionRequestsParameters(int testCombinationId, int testSessionId, string requestdata)
+    public TestSessionRequestsParameters(int testCombinationId, int testSessionId, string requestdata, string beforestep, string afterstep)
     {
         TestCombinationId = testCombinationId;
         TestSessionId = testSessionId;
         RequestData = requestdata;
+        BeforeStep = beforestep;
+        AfterStep = afterstep;
     }
 }

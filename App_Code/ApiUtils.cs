@@ -34,6 +34,23 @@ public static class ApiUtils
     public static string ValidateCode_Method_Out { get; set; }
     public static string ValidateCode_Username_Out { get; set; }
     public static string ValidateCode_Password_Out { get; set; }
+    public static string ValidateUsername_Url_Out { get; set; }
+    public static string ValidateUsername_ContentType_Out { get; set; }
+    public static string ValidateUsername_Method_Out { get; set; }
+    public static string ValidateUsername_Username_Out { get; set; }
+    public static string ValidateUsername_Password_Out { get; set; }
+    public static string ValidateUMCN_Url_Out { get; set; }
+    public static string ValidateUMCN_ContentType_Out { get; set; }
+    public static string ValidateUMCN_Method_Out { get; set; }
+    public static string ValidateUMCN_Username_Out { get; set; }
+    public static string ValidateUMCN_Password_Out { get; set; }
+    /******BASIC AUTH*******/
+    public static string RegisterUser_BasicAuth { get; set; }
+    public static string SearchUserIDByUsername_BasicAuth { get; set; }
+    public static string SCIMcheckData_BasicAuth { get; set; }
+    public static string ValidateCode_BasicAuth { get; set; }
+    public static string ValidateUsername_BasicAuth { get; set; }
+    public static string ValidateUMCN_BasicAuth { get; set; }
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -71,6 +88,7 @@ public static class ApiUtils
                         RegisterUser_Method_Out = RegisterUser_Method_Out_Final;
                         RegisterUser_Username_Out = RegisterUser_Username_Out_Final;
                         RegisterUser_Password_Out = RegisterUser_Password_Out_Final;
+                        RegisterUser_BasicAuth = RegisterUser_Username_Out + ":" + RegisterUser_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
                     }
                     if (navigator.Name == "SearchUserIDByUsername")
@@ -81,6 +99,7 @@ public static class ApiUtils
                         SearchUserIDByUsername_Method_Out = SearchUserIDByUsername_Method_Out_Final;
                         SearchUserIDByUsername_Username_Out = SearchUserIDByUsername_Username_Out_Final;
                         SearchUserIDByUsername_Password_Out = SearchUserIDByUsername_Password_Out_Final;
+                        SearchUserIDByUsername_BasicAuth = SearchUserIDByUsername_Username_Out + ":" + SearchUserIDByUsername_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
                         navigator.MoveToNext();
                     }
@@ -92,6 +111,7 @@ public static class ApiUtils
                         SCIMcheckData_Method_Out = SCIMcheckData_Method_Out_Final;
                         SCIMcheckData_Username_Out = SCIMcheckData_Username_Out_Final;
                         SCIMcheckData_Password_Out = SCIMcheckData_Password_Out_Final;
+                        SCIMcheckData_BasicAuth = SCIMcheckData_Username_Out + ":" + SCIMcheckData_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
                         navigator.MoveToNext();
                         navigator.MoveToNext();
@@ -104,6 +124,37 @@ public static class ApiUtils
                         ValidateCode_Method_Out = ValidateCode_Method_Out_Final;
                         ValidateCode_Username_Out = ValidateCode_Username_Out_Final;
                         ValidateCode_Password_Out = ValidateCode_Password_Out_Final;
+                        ValidateCode_BasicAuth = ValidateCode_Username_Out + ":" + ValidateCode_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigator.MoveToNext();
+                        navigator.MoveToNext();
+                        navigator.MoveToNext();
+                    }
+                    if (navigator.Name == "ValidateUsername")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string ValidateUsername_Url_Out_Final, out string ValidateUsername_ContentType_Out_Final, out string ValidateUsername_Method_Out_Final, out string ValidateUsername_Username_Out_Final, out string ValidateUsername_Password_Out_Final);
+                        ValidateUsername_Url_Out = ValidateUsername_Url_Out_Final;
+                        ValidateUsername_ContentType_Out = ValidateUsername_ContentType_Out_Final;
+                        ValidateUsername_Method_Out = ValidateUsername_Method_Out_Final;
+                        ValidateUsername_Username_Out = ValidateUsername_Username_Out_Final;
+                        ValidateUsername_Password_Out = ValidateUsername_Password_Out_Final;
+                        ValidateUsername_BasicAuth = ValidateUsername_Username_Out + ":" + ValidateUsername_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigator.MoveToNext();
+                        navigator.MoveToNext();
+                        navigator.MoveToNext();
+                        navigator.MoveToNext();
+                    }
+                    if (navigator.Name == "ValidateUMCN")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string ValidateUMCN_Url_Out_Final, out string ValidateUMCN_ContentType_Out_Final, out string ValidateUMCN_Method_Out_Final, out string ValidateUMCN_Username_Out_Final, out string ValidateUMCN_Password_Out_Final);
+                        ValidateUMCN_Url_Out = ValidateUMCN_Url_Out_Final;
+                        ValidateUMCN_ContentType_Out = ValidateUMCN_ContentType_Out_Final;
+                        ValidateUMCN_Method_Out = ValidateUMCN_Method_Out_Final;
+                        ValidateUMCN_Username_Out = ValidateUMCN_Username_Out_Final;
+                        ValidateUMCN_Password_Out = ValidateUMCN_Password_Out_Final;
+                        ValidateUMCN_BasicAuth = ValidateUMCN_Username_Out + ":" + ValidateUMCN_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
                     }
                 } while (navigator.MoveToNext());
             }
@@ -158,11 +209,7 @@ public static class ApiUtils
     }
 
 
-    /******BASIC AUTH*******/
-    public static string RegisterUser_BasicAuth = RegisterUser_Username_Out + ":" + RegisterUser_Password_Out;
-    public static string SearchUserIDByUsername_BasicAuth = SearchUserIDByUsername_Username_Out + ":" + SearchUserIDByUsername_Password_Out;
-    public static string SCIMcheckData_BasicAuth = String.Concat(SCIMcheckData_Username_Out, SCIMcheckData_Password_Out);
-    public static string ValidateCode_BasicAuth = ValidateCode_Username_Out + ":" + ValidateCode_Password_Out;
+
 
     public static string RegisterUser_WebRequestCall(string data, out string result_Final_RegisterUser, out string StatusCode_Final_RegisterUser, out string StatusDescription_Final_RegisterUser, out string result_Final_NotOK)
     {
@@ -204,25 +251,33 @@ public static class ApiUtils
         StatusDescription_Final_SCIMcheckData = string.Empty;
         result_Final_SCIMcheckData = string.Empty;
         result_Final_NotOK = string.Empty;
+        string WebCall = string.Empty;
         /*******************************/
         if (Method == ConstantsProject.DELETE_METHOD)
         {
-            string WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), Method, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), Method, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
             StatusCode_Final_SCIMcheckData = StatusCodeFinal;
             StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
             result_Final_SCIMcheckData = resultFinal;
             result_Final_NotOK = resultFinalBad;
-            return WebCall;
+        }
+        else if (Method == ConstantsProject.PUT_METHOD)
+        {
+            WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), Method, "application/json", SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            StatusCode_Final_SCIMcheckData = StatusCodeFinal;
+            StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
+            result_Final_SCIMcheckData = resultFinal;
+            result_Final_NotOK = resultFinalBad;
         }
         else
         {
-            string WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
             StatusCode_Final_SCIMcheckData = StatusCodeFinal;
             StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
             result_Final_SCIMcheckData = resultFinal;
             result_Final_NotOK = resultFinalBad;
-            return WebCall;
         }
+        return WebCall;
     }
 
     public static string SCIMcheckData_WebRequestCall_All(string data, out string result_Final_SCIMcheckData_All, out string StatusCode_Final_SCIMcheckData_All, out string StatusDescription_Final_SCIMcheckData_All, out string result_Final_NotOK)
@@ -232,7 +287,7 @@ public static class ApiUtils
         result_Final_SCIMcheckData_All = string.Empty;
         result_Final_NotOK = string.Empty;
         /*******************************/
-        string WebCall = WebRequestCall(data, SCIMcheckData_Url_Out, SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, "admin@wso2.com:admin", out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(data, SCIMcheckData_Url_Out, SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_SCIMcheckData_All = StatusCodeFinal;
         StatusDescription_Final_SCIMcheckData_All = StatusDescriptionFinal;
@@ -259,6 +314,39 @@ public static class ApiUtils
         return WebCall;
     }
 
+    public static string ValidateUsername_WebRequestCall(string data, out string result_Final_ValidateUsername, out string StatusCode_Final_ValidateUsername, out string StatusDescription_Final_ValidateUsername, out string resultFinal_NotOK)
+    {
+        result_Final_ValidateUsername = string.Empty;
+        StatusCode_Final_ValidateUsername = string.Empty;
+        StatusDescription_Final_ValidateUsername = string.Empty;
+        resultFinal_NotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, ValidateUsername_Url_Out, ValidateUsername_Method_Out, ValidateUsername_ContentType_Out, ValidateUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        result_Final_ValidateUsername = resultFinal;
+        StatusCode_Final_ValidateUsername = StatusCodeFinal;
+        StatusDescription_Final_ValidateUsername = StatusDescriptionFinal;
+        resultFinal_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
+
+    public static string ValidateUMCN_WebRequestCall(string data, out string result_Final_ValidateUMCN, out string StatusCode_Final_ValidateUMCN, out string StatusDescription_Final_ValidateUMCN, out string resultFinal_NotOK)
+    {
+        result_Final_ValidateUMCN = string.Empty;
+        StatusCode_Final_ValidateUMCN = string.Empty;
+        StatusDescription_Final_ValidateUMCN = string.Empty;
+        resultFinal_NotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, ValidateUMCN_Url_Out, ValidateUMCN_Method_Out, ValidateUMCN_ContentType_Out, ValidateUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        result_Final_ValidateUMCN = resultFinal;
+        StatusCode_Final_ValidateUMCN = StatusCodeFinal;
+        StatusDescription_Final_ValidateUMCN = StatusDescriptionFinal;
+        resultFinal_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
 
     public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
     {

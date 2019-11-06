@@ -76,6 +76,7 @@
                                     <asp:Button ID="btnCreateTest" runat="server" CssClass="btn btn-info px-4" Text="Create test" OnClick="btnCreateTest_Click" />
                                     <div class="mt-5">
                                         <asp:Button ID="btnDeleteUsersOnSCIM" runat="server" CssClass="btn btn-secondary px-4" Text="SCIM Delete Users" OnClick="btnDeleteUsersOnSCIM_Click" />
+                                        <asp:CheckBox ID="CheckBox1" runat="server" style="font-size:16px;" CssClass="ml-2" AutoPostBack="true" OnCheckedChanged="CheckBox1_CheckedChanged" Text="enable"/>
                                     </div>
                                 </div>
                         </div>

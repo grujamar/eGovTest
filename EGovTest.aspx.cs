@@ -37,6 +37,7 @@ public partial class EGovTest : System.Web.UI.Page
             log.Info(pageName + " page start.");
             ChangeVisibility(true);
             Session["EGovTest_ddlSelectedValue"] = 0;
+            btnDeleteUsersOnSCIM.Enabled = false;
         }
     }
 
@@ -60,7 +61,6 @@ public partial class EGovTest : System.Web.UI.Page
 
             if (Page.IsValid)
             {
-                //todo call procedure for Create Test
                 ProjectUtility utility = new ProjectUtility();
                 List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
                 log.Info("Start prepared Requests for test. ");
@@ -109,19 +109,27 @@ public partial class EGovTest : System.Web.UI.Page
             {
                 case ConstantsProject.REGISTER_USER_ID:
                     log.Info("Start Register user. ");
-                    RegisterUserAutoTest();
+                    WebApiCallsByMethod(methodID);
                     log.Info("End Register user. ");
                     break;
-                case ConstantsProject.VALIDATE_CODE_USER_ID:
+                case ConstantsProject.VALIDATE_CODE_METHOD_ID:
                     log.Info("Start Validate code. ");
-                    ValidateCodeAutoTest();
+                    WebApiCallsByMethod(methodID);
                     log.Info("End Validate code. ");
                     break;
-                case 5:
-                    
+                case ConstantsProject.VALIDATE_USERNAME_METHOD_ID:
+                    log.Info("Start Validate Username. ");
+                    WebApiCallsByMethod(methodID);
+                    log.Info("End Validate Username. ");
+                    break;
+                case ConstantsProject.VALIDATE_UMCN_METHOD_ID:
+                    log.Info("Start Validate UMCN. ");
+                    WebApiCallsByMethod(methodID);
+                    log.Info("End Validate UMCN. ");
+                    break;
+                case 10:
                     break;
             }
-
             ScriptManager.RegisterStartupScript(this, GetType(), "SuccessSendingData", "SuccessSendingData();", true);
         }
         catch (Exception ex)
@@ -130,35 +138,6 @@ public partial class EGovTest : System.Web.UI.Page
             ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
         }
     }
-
-
-    protected void RegisterUserAutoTest()
-    {
-        try
-        {
-            int methodID_RegisterUser = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
-            WebApiCallsByMethod(methodID_RegisterUser);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Error in function RegisterUserAutoTest. " + ex.Message);
-        }
-    }
-
-
-    protected void ValidateCodeAutoTest()
-    {
-        try
-        {
-            int methodID_ValidateCode = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
-            WebApiCallsByMethod(methodID_ValidateCode);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Error in function ValidateCodeAutoTest. " + ex.Message);
-        }
-    }
-
 
     protected void WebApiCallsByMethod(int MethodId)
     {
@@ -187,6 +166,30 @@ public partial class EGovTest : System.Web.UI.Page
                 if (result != 0)
                 {
                     throw new Exception("Error while trying to start combination. Result is: " + result);
+                }
+
+                ////////
+                if (!item.BeforeStep.Equals("-"))
+                {
+                    log.Info("BeforeSTEP. Request is " + item.BeforeStep);
+                    string jsonDataSCIM_Update = item.BeforeStep;
+                    string jsonDataSCIM_Update_Replace = jsonDataSCIM_Update.Replace(@"""""", @"""");
+                    log.Info("After replacing is " + jsonDataSCIM_Update_Replace);
+                    string Username = ParseBeforeStepUsername(jsonDataSCIM_Update_Replace);
+
+                    log.Info("Start SearchUserIDByUsername in BeforeSTEP ");
+                    string resultFinalSearchUserIDByUsername = string.Empty;
+                    //todo string.empty   item.Username
+                    string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsername_WebRequestCall(string.Empty, Username, out resultFinalSearchUserIDByUsername, out string statusCodeSearch, out string statusDescriptionSearch, out string resulNotOKsearch);
+                    string UserId = ParseResponse(resultFinalSearchUserIDByUsername);
+                    log.Info("End SearchUserIDByUsername in BeforeSTEP. Response result is: " + UserId);
+
+                    //SCIM UPDATE
+                    log.Info("Start SCIM update user in BeforeSTEP. ");
+                    string SCIM_UpdateUser_Response = ApiUtils.SCIMcheckData_WebRequestCall(jsonDataSCIM_Update_Replace, UserId, ConstantsProject.PUT_METHOD, out string resultPUTFinal, out string statusCode, out string statusDescription, out string resultNotOK);
+                    string UpdateResponseExternal = resultPUTFinal;
+                    string UpdateResponseStatusExternal = statusCode + " " + statusDescription;
+                    log.Info("End SCIM update user in BeforeSTEP. UserId is " + UserId);
                 }
 
                 string username = string.Empty;
@@ -233,13 +236,22 @@ public partial class EGovTest : System.Web.UI.Page
                     RegisterUser_WebAPICalls(jsonData, Username, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End RegisterUser_WebAPICalls. ");
                     break;
-                case ConstantsProject.VALIDATE_CODE_USER_ID:
+                case ConstantsProject.VALIDATE_CODE_METHOD_ID:
                     log.Info("Start ValidateCode_WebAPICalls. ");
-                    ValidateCode_WebAPICalls(jsonData, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    Validate_WebAPICalls(jsonData, ConstantsProject.VALIDATE_CODE_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End ValidateCode_WebAPICalls. ");
                     break;
-                case 5:
-
+                case ConstantsProject.VALIDATE_USERNAME_METHOD_ID:
+                    log.Info("Start ValidateUsername_WebAPICalls. ");
+                    Validate_WebAPICalls(jsonData, ConstantsProject.VALIDATE_USERNAME_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End ValidateUsername_WebAPICalls. ");
+                    break;
+                case ConstantsProject.VALIDATE_UMCN_METHOD_ID:
+                    log.Info("Start ValidateUMCN_WebAPICalls. ");
+                    Validate_WebAPICalls(jsonData, ConstantsProject.VALIDATE_UMCN_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End ValidateUMCN_WebAPICalls. ");
+                    break;
+                case 10:
                     break;
             }
         }
@@ -304,7 +316,6 @@ public partial class EGovTest : System.Web.UI.Page
                 }
                 log.Info("End calling SCIM web service. ");
 
-
                 FinalOutcome = CheckFinalOutcome(FinalOutcomeFirstStep, FinalOutcomeSecondStep);
                 log.Info("FinalOutcome is - " + FinalOutcome);
             }
@@ -315,30 +326,38 @@ public partial class EGovTest : System.Web.UI.Page
         }
     }
 
-    protected void ValidateCode_WebAPICalls(string jsonData, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    protected void Validate_WebAPICalls(string jsonData, int methodID, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
     {
         Response = string.Empty;
         ResponseStatus = string.Empty;
         ResponseExternal = string.Empty;
         ResponseStatusExternal = string.Empty;
+        string statusCode = string.Empty;
+        string resultResponse = string.Empty;
+        string statusDescription = string.Empty;
+        string resulNotOK = string.Empty;
         FinalOutcome = false;
         bool FinalOutcomeFirstStep = false;
 
         try
         {
-            log.Info("Validate code API start. ");
-            string ValidateCode_Response = ApiUtils.ValidateCode_WebRequestCall(jsonData, out string resultResponse, out string statusCode, out string statusDescription, out string resulNotOK);
-            ResponseStatus = statusCode + " " + statusDescription;
-            if (Convert.ToInt32(statusCode) == ConstantsProject.VALIDATE_CODE_ОК)
+            log.Info("Validate API for method " + methodID + " start.");
+            if (methodID == ConstantsProject.VALIDATE_CODE_METHOD_ID)
             {
-                FinalOutcomeFirstStep = true;
-                Response = resultResponse;
+                string ValidateCode_Response = ApiUtils.ValidateCode_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
+                ApiResponse(statusCode, ConstantsProject.VALIDATE_CODE_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
             }
-            else
+            else if (methodID == ConstantsProject.VALIDATE_USERNAME_METHOD_ID)
             {
-                Response = resulNotOK;
+                string ValidateUsername_Response = ApiUtils.ValidateUsername_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
+                ApiResponse(statusCode, ConstantsProject.VALIDATE_USERNAME_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
             }
-            log.Info("Validate code API end. Response result is: " + Response + " " + ResponseStatus);
+            else if (methodID == ConstantsProject.VALIDATE_UMCN_METHOD_ID)
+            {
+                string ValidateUMCN_Response = ApiUtils.ValidateUMCN_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
+                ApiResponse(statusCode, ConstantsProject.VALIDATE_USERNAME_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
+            }
+            log.Info("Validate API for method " + methodID + " end. Response result is: " + Response + " " + ResponseStatus);
 
             FinalOutcome = FinalOutcomeFirstStep;
             log.Info("FinalOutcome is - " + FinalOutcome);
@@ -346,6 +365,43 @@ public partial class EGovTest : System.Web.UI.Page
         catch (Exception ex)
         {
             log.Error("Error in function ValidateCode_WebAPICalls. " + ex.Message);
+        }
+    }
+
+    protected void ApiResponse(string statusCode, int responseResultOK, string resultResponse, string statusDescription, string resulNotOK, out string ResponseStatus, out bool FinalOutcomeFirstStep, out string Response)
+    {
+        ResponseStatus = string.Empty;
+        FinalOutcomeFirstStep = false;
+        Response = string.Empty;
+
+        try
+        {
+            ResponseStatus = statusCode + " " + statusDescription;
+            if (Convert.ToInt32(statusCode) == responseResultOK)
+            {
+                if (resultResponse == string.Empty)
+                {
+                    FinalOutcomeFirstStep = true;
+                }
+                else
+                {
+                    string statusCodeUMCN = ParseRequestForUMCN(resultResponse);
+                    log.Info("statusCode for UMCN is " + statusCodeUMCN); 
+                    if (Convert.ToInt32(statusCodeUMCN) == ConstantsProject.VALIDATE_UMCN_ОК)
+                    {
+                        FinalOutcomeFirstStep = true;
+                    }
+                }
+                Response = resultResponse;
+            }
+            else
+            {
+                Response = resulNotOK;
+            }
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error in function ApiResponse. " + ex.Message);
         }
     }
 
@@ -387,8 +443,29 @@ public partial class EGovTest : System.Web.UI.Page
         return res;
     }
 
-    
+    protected string ParseBeforeStepUsername(string jsonResponse)
+    {
+        string res = string.Empty;
 
+        // Parse your Result to an Array
+        var x = JObject.Parse(jsonResponse);
+        var res1 = x["userName"];
+        res = res1.ToString();
+
+        return res;
+    }
+
+    protected string ParseRequestForUMCN(string jsonResponse)
+    {
+        string res = string.Empty;
+
+        // Parse your Result to an Array
+        var x = JObject.Parse(jsonResponse);
+        var res1 = x["statusCode"];
+        res = res1.ToString();
+
+        return res;
+    }
 
     protected void Cvmethod_ServerValidate(object source, ServerValidateEventArgs args)
     {
@@ -413,8 +490,6 @@ public partial class EGovTest : System.Web.UI.Page
         Session["EGovTest_ddlSelectedValue"] = SelectedValue;
     }
 
-
-    
 
     //List<TestCombination> TestCombinationList = new List<TestCombination>();
     //TestCombinationList = (List<TestCombination>)Session["EGovTest_TestSessionRequestsParameterList"];
@@ -582,5 +657,17 @@ public partial class EGovTest : System.Web.UI.Page
         }
 
         return resultList;
+    }
+
+    public void CheckBox1_CheckedChanged(object sender, EventArgs e)
+    {
+        if (CheckBox1.Checked == true)
+        {
+            btnDeleteUsersOnSCIM.Enabled = true;
+        }
+        else
+        {
+            btnDeleteUsersOnSCIM.Enabled = false;
+        }
     }
 }
