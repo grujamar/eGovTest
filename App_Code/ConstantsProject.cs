@@ -20,6 +20,7 @@ public class ConstantsProject
     public const int VALIDATE_CODE_METHOD_ID = 4;
     public const int VALIDATE_USERNAME_METHOD_ID = 5;
     public const int VALIDATE_UMCN_METHOD_ID = 6;
+    public const int EXPORT_USER_INFO_BY_USERNAME = 7;
     /// <summary>
     /// ////////
     /// </summary>
@@ -32,4 +33,6 @@ public class ConstantsProject
     public const int VALIDATE_USERNAME_ОК = 200;
 
     public const int VALIDATE_UMCN_ОК = 60000;
+
+    public const int EXPORT_USER_INFO_BY_USERNAME_ОК = 200;
 }

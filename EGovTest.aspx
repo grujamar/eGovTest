@@ -59,16 +59,16 @@
                                 <div id="beforeCreateTest" runat="server">
                                     <div class="row my-5">
                                         <!--div ddlizbor start-->
-                                        <div class="col-12 col-lg-4 mb-1 mb-md-4">
+                                        <div class="col-12 col-lg-3 mb-1 mb-md-4">
                                             <asp:Label id="spanmethod" runat="server" CssClass="submit-span">*</asp:Label><asp:Label id="lblmethod" runat="server" CssClass="submit-label ml-2">Choose method:</asp:Label> 
                                         </div>
-                                        <div class="col-12 col-lg-4">
+                                        <div class="col-12 col-lg-6">
                                             <asp:DropDownList ID="ddlmethod" runat="server" AppendDataBoundItems="True" CssClass="submit-dropdownlist" OnSelectedIndexChanged="ddlmethod_SelectedIndexChanged" DataSourceID="dsMethod" DataTextField="MethodName" DataValueField="MethodId">
                                             <asp:ListItem Selected="True" Value="0">--Choose--</asp:ListItem>
                                             </asp:DropDownList>
                                             <asp:SqlDataSource ID="dsMethod" runat="server" ConnectionString="<%$ ConnectionStrings:EGovTestingConnectionString %>" SelectCommand="SELECT MethodName, MethodId FROM Method"></asp:SqlDataSource>
                                         </div>
-                                        <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                                        <div class="col-12 col-lg-3 mb-3 mb-lg-0">
                                             <asp:CustomValidator runat="server" id="cvmethod" controltovalidate="ddlmethod" errormessage="" OnServerValidate="Cvmethod_ServerValidate" CssClass="submit-customValidator" Display="Dynamic" ForeColor="Red" ValidateEmptyText="true" ValidationGroup="AddCustomValidatorToGroup"/>
                                         </div><!--div ddlizbor end-->
                                     </div>

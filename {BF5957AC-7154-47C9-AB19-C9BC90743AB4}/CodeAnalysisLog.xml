@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="c:\program files (x86)\microsoft visual studio\2017\community\team tools\static analysis tools\fxcop\Xml\CodeAnalysisReport.xsl"?>
 <FxCopReport Version="15.0">
  <Targets>
-  <Target Name="C:\Users\Marko\AppData\Local\Temp\tmpA531.tmp.cadir\bin\App_Code.dll">
+  <Target Name="C:\Users\Marko\AppData\Local\Temp\tmpBEBA.tmp.cadir\bin\App_Code.dll">
    <Modules>
     <Module Name="app_code.dll">
      <Namespaces>
@@ -12,8 +12,8 @@
          <Members>
           <Member Name="#WebRequestCall(System.String,System.String,System.String,System.String,System.String,System.String&amp;,System.String&amp;,System.String&amp;,System.String&amp;)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-10-31 12:56:20Z" FixCategory="DependsOnFix">
-             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ApiUtils.cs" Line="272">Object 'stream' can be disposed more than once in method 'ApiUtils.WebRequestCall(string, string, string, string, string, out string, out string, out string, out string)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 272</Issue>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-11-08 11:07:05Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ApiUtils.cs" Line="455">Object 'stream' can be disposed more than once in method 'ApiUtils.WebRequestCall(string, string, string, string, string, out string, out string, out string, out string)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 455</Issue>
             </Message>
            </Messages>
           </Member>
@@ -23,43 +23,43 @@
          <Members>
           <Member Name="#IsAvailableConnection()" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-10-31 12:56:20Z" FixCategory="DependsOnFix">
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-11-08 11:07:05Z" FixCategory="DependsOnFix">
              <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="40">Object 'objConn' can be disposed more than once in method 'ProjectUtility.IsAvailableConnection()'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 40</Issue>
             </Message>
            </Messages>
           </Member>
           <Member Name="#SelectAllCombinationsRegisterUser(System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-10-31 12:56:20Z" FixCategory="DependsOnFix">
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-11-08 11:07:05Z" FixCategory="DependsOnFix">
              <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="96">Object 'objConn' can be disposed more than once in method 'ProjectUtility.SelectAllCombinationsRegisterUser(int)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 96</Issue>
             </Message>
            </Messages>
           </Member>
           <Member Name="#testCombinationFinish(System.Int32,System.String,System.String,System.String,System.String,System.Boolean,System.Int32&amp;)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-10-31 12:56:20Z" FixCategory="DependsOnFix">
-             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="348">Object 'objConn' can be disposed more than once in method 'ProjectUtility.testCombinationFinish(int, string, string, string, string, bool, out int)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 348</Issue>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-11-08 11:07:05Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="350">Object 'objConn' can be disposed more than once in method 'ProjectUtility.testCombinationFinish(int, string, string, string, string, bool, out int)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 350</Issue>
             </Message>
            </Messages>
           </Member>
           <Member Name="#testCombinationStart(System.Int32,System.Int32&amp;)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-10-31 12:56:20Z" FixCategory="DependsOnFix">
-             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="310">Object 'objConn' can be disposed more than once in method 'ProjectUtility.testCombinationStart(int, out int)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 310</Issue>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-11-08 11:07:05Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="312">Object 'objConn' can be disposed more than once in method 'ProjectUtility.testCombinationStart(int, out int)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 312</Issue>
             </Message>
            </Messages>
           </Member>
           <Member Name="#testSessionFinish(System.Int32,System.Int32&amp;)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-10-31 12:56:20Z" FixCategory="DependsOnFix">
-             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="278">Object 'objConn' can be disposed more than once in method 'ProjectUtility.testSessionFinish(int, out int)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 278</Issue>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-11-08 11:07:05Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="280">Object 'objConn' can be disposed more than once in method 'ProjectUtility.testSessionFinish(int, out int)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 280</Issue>
             </Message>
            </Messages>
           </Member>
           <Member Name="#testSessionStart(System.Int32,System.Int32&amp;)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-10-31 12:56:20Z" FixCategory="DependsOnFix">
-             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="245">Object 'objConn' can be disposed more than once in method 'ProjectUtility.testSessionStart(int, out int)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 245</Issue>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2019-11-08 11:07:05Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\Marko\Desktop\eGov\.Net\EGovTesting\EGovTesting\App_Code" File="ProjectUtility.cs" Line="247">Object 'objConn' can be disposed more than once in method 'ProjectUtility.testSessionStart(int, out int)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 247</Issue>
             </Message>
            </Messages>
           </Member>
@@ -76,7 +76,7 @@
   <Rule TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202">
    <Name>Do not dispose objects multiple times</Name>
    <Description>A correctly implemented Dispose method can be called multiple times without throwing an exception. However, this is not guaranteed and to avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.</Description>
-   <Resolution Name="Default">Object {0} can be disposed more than once in method {1}. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 348</Resolution>
+   <Resolution Name="Default">Object {0} can be disposed more than once in method {1}. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 350</Resolution>
    <Owner>RuleOwner</Owner>
    <Url>http://msdn.microsoft.com/library/ms182334.aspx</Url>
    <Email />

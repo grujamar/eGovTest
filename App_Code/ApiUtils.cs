@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.XPath;
+using Newtonsoft.Json.Linq;
 
 public static class ApiUtils
 {
@@ -44,6 +45,11 @@ public static class ApiUtils
     public static string ValidateUMCN_Method_Out { get; set; }
     public static string ValidateUMCN_Username_Out { get; set; }
     public static string ValidateUMCN_Password_Out { get; set; }
+    public static string ExportUserInfoByUsername_Url_Out { get; set; }
+    public static string ExportUserInfoByUsername_ContentType_Out { get; set; }
+    public static string ExportUserInfoByUsername_Method_Out { get; set; }
+    public static string ExportUserInfoByUsername_Username_Out { get; set; }
+    public static string ExportUserInfoByUsername_Password_Out { get; set; }
     /******BASIC AUTH*******/
     public static string RegisterUser_BasicAuth { get; set; }
     public static string SearchUserIDByUsername_BasicAuth { get; set; }
@@ -51,6 +57,7 @@ public static class ApiUtils
     public static string ValidateCode_BasicAuth { get; set; }
     public static string ValidateUsername_BasicAuth { get; set; }
     public static string ValidateUMCN_BasicAuth { get; set; }
+    public static string ExportUserInfoByUsername_BasicAuth { get; set; }
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -113,8 +120,7 @@ public static class ApiUtils
                         SCIMcheckData_Password_Out = SCIMcheckData_Password_Out_Final;
                         SCIMcheckData_BasicAuth = SCIMcheckData_Username_Out + ":" + SCIMcheckData_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
-                        navigator.MoveToNext();
-                        navigator.MoveToNext();
+                        navigatorMoveToNextLoop(navigator, 2);
                     }
                     if (navigator.Name == "ValidateCode")
                     {
@@ -126,9 +132,7 @@ public static class ApiUtils
                         ValidateCode_Password_Out = ValidateCode_Password_Out_Final;
                         ValidateCode_BasicAuth = ValidateCode_Username_Out + ":" + ValidateCode_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
-                        navigator.MoveToNext();
-                        navigator.MoveToNext();
-                        navigator.MoveToNext();
+                        navigatorMoveToNextLoop(navigator, 3);
                     }
                     if (navigator.Name == "ValidateUsername")
                     {
@@ -140,10 +144,7 @@ public static class ApiUtils
                         ValidateUsername_Password_Out = ValidateUsername_Password_Out_Final;
                         ValidateUsername_BasicAuth = ValidateUsername_Username_Out + ":" + ValidateUsername_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
-                        navigator.MoveToNext();
-                        navigator.MoveToNext();
-                        navigator.MoveToNext();
-                        navigator.MoveToNext();
+                        navigatorMoveToNextLoop(navigator, 4);
                     }
                     if (navigator.Name == "ValidateUMCN")
                     {
@@ -155,6 +156,18 @@ public static class ApiUtils
                         ValidateUMCN_Password_Out = ValidateUMCN_Password_Out_Final;
                         ValidateUMCN_BasicAuth = ValidateUMCN_Username_Out + ":" + ValidateUMCN_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigatorMoveToNextLoop(navigator, 5);
+                    }
+                    if (navigator.Name == "ExportUserInfoByUsername")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string ExportUserInfoByUsername_Url_Out_Final, out string ExportUserInfoByUsername_ContentType_Out_Final, out string ExportUserInfoByUsername_Method_Out_Final, out string ExportUserInfoByUsername_Username_Out_Final, out string ExportUserInfoByUsername_Password_Out_Final);
+                        ExportUserInfoByUsername_Url_Out = ExportUserInfoByUsername_Url_Out_Final;
+                        ExportUserInfoByUsername_ContentType_Out = ExportUserInfoByUsername_ContentType_Out_Final;
+                        ExportUserInfoByUsername_Method_Out = ExportUserInfoByUsername_Method_Out_Final;
+                        ExportUserInfoByUsername_Username_Out = ExportUserInfoByUsername_Username_Out_Final;
+                        ExportUserInfoByUsername_Password_Out = ExportUserInfoByUsername_Password_Out_Final;
+                        ExportUserInfoByUsername_BasicAuth = ExportUserInfoByUsername_Username_Out + ":" + ExportUserInfoByUsername_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
                     }
                 } while (navigator.MoveToNext());
             }
@@ -162,6 +175,14 @@ public static class ApiUtils
         catch (Exception ex)
         {
             log.Error("Error while reading configuration data. " + ex.Message);
+        }
+    }
+
+    public static void navigatorMoveToNextLoop(XPathNavigator navigator, int howManyTimes)
+    {
+        for (int i = 0; i < howManyTimes; i++)
+        {
+            navigator.MoveToNext();
         }
     }
 
@@ -348,6 +369,23 @@ public static class ApiUtils
         return WebCall;
     }
 
+    public static string ExportUserInfoByUsername_WebRequestCall(string data, string username, out string result_Final_ExportUserInfoByUsername, out string StatusCode_Final_ExportUserInfoByUsername, out string StatusDescription_Final_ExportUserInfoByUsername, out string resultFinal_NotOK)
+    {
+        result_Final_ExportUserInfoByUsername = string.Empty;
+        StatusCode_Final_ExportUserInfoByUsername = string.Empty;
+        StatusDescription_Final_ExportUserInfoByUsername = string.Empty;
+        resultFinal_NotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, (ExportUserInfoByUsername_Url_Out + username), ExportUserInfoByUsername_Method_Out, ExportUserInfoByUsername_ContentType_Out, ExportUserInfoByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        result_Final_ExportUserInfoByUsername = resultFinal;
+        StatusCode_Final_ExportUserInfoByUsername = StatusCodeFinal;
+        StatusDescription_Final_ExportUserInfoByUsername = StatusDescriptionFinal;
+        resultFinal_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
+
     public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
     {
         StatusCodeFinal = string.Empty;
@@ -471,5 +509,30 @@ public static class ApiUtils
         }
 
         return returnValue;
+    }
+
+
+    public static string ParseJsonOneValue(string jsonResponse, string requestText)
+    {
+        string res = string.Empty;
+
+        // Parse your Result to an Array
+        var x = JObject.Parse(jsonResponse);
+        var res1 = x[requestText];
+        res = res1.ToString();
+
+        return res;
+    }
+
+    public static string ParseJsonTwoValues(string jsonResponse, string requestFirstText, string requestSecondText)
+    {
+        string res = string.Empty;
+
+        // Parse your Result to an Array
+        var x = JObject.Parse(jsonResponse);
+        var res1 = x[requestFirstText][requestSecondText];
+        res = res1.ToString();
+
+        return res;
     }
 }

@@ -384,6 +384,40 @@ public class ProjectUtility
         return MethodID;
     }
 
+
+    public string getMethodName(int MethodId)
+    {
+        string MethodName = string.Empty;
+
+        string query = @"SELECT        MethodName
+                        FROM            dbo.Method
+                        WHERE        (MethodId = @methodid)";
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand(query, objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.Text;
+                    objCmd.Parameters.Add("@methodid", System.Data.SqlDbType.Int).Value = MethodId;
+                    objConn.Open();
+                    SqlDataReader reader = objCmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        MethodName = reader.GetString(0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in fuction getMethodName. " + ex.Message);
+                    throw new Exception("Error in fuction getMethodName. " + ex.Message);
+                }
+            }
+        }
+        return MethodName;
+    }
+
 }
 /*
 public void loginAdmin(string Username, string Password, out int IDLogAdmin, out int result)

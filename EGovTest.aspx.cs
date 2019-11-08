@@ -104,32 +104,13 @@ public partial class EGovTest : System.Web.UI.Page
     {
         try
         {
+            ProjectUtility utility = new ProjectUtility();
             int methodID = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
-            switch (methodID)
-            {
-                case ConstantsProject.REGISTER_USER_ID:
-                    log.Info("Start Register user. ");
-                    WebApiCallsByMethod(methodID);
-                    log.Info("End Register user. ");
-                    break;
-                case ConstantsProject.VALIDATE_CODE_METHOD_ID:
-                    log.Info("Start Validate code. ");
-                    WebApiCallsByMethod(methodID);
-                    log.Info("End Validate code. ");
-                    break;
-                case ConstantsProject.VALIDATE_USERNAME_METHOD_ID:
-                    log.Info("Start Validate Username. ");
-                    WebApiCallsByMethod(methodID);
-                    log.Info("End Validate Username. ");
-                    break;
-                case ConstantsProject.VALIDATE_UMCN_METHOD_ID:
-                    log.Info("Start Validate UMCN. ");
-                    WebApiCallsByMethod(methodID);
-                    log.Info("End Validate UMCN. ");
-                    break;
-                case 10:
-                    break;
-            }
+            string MethodName = utility.getMethodName(methodID);
+            log.Info("START TESTING METHOD: " + MethodName);
+            WebApiCallsByMethod(methodID);
+            log.Info("END TESTING METHOD: " + MethodName);
+
             ScriptManager.RegisterStartupScript(this, GetType(), "SuccessSendingData", "SuccessSendingData();", true);
         }
         catch (Exception ex)
@@ -168,20 +149,20 @@ public partial class EGovTest : System.Web.UI.Page
                     throw new Exception("Error while trying to start combination. Result is: " + result);
                 }
 
-                ////////
+                /////////BEFORE STEP////////////
                 if (!item.BeforeStep.Equals("-"))
                 {
                     log.Info("BeforeSTEP. Request is " + item.BeforeStep);
                     string jsonDataSCIM_Update = item.BeforeStep;
                     string jsonDataSCIM_Update_Replace = jsonDataSCIM_Update.Replace(@"""""", @"""");
                     log.Info("After replacing is " + jsonDataSCIM_Update_Replace);
-                    string Username = ParseBeforeStepUsername(jsonDataSCIM_Update_Replace);
+                    string Username = ApiUtils.ParseJsonOneValue(jsonDataSCIM_Update_Replace, "userName");
 
                     log.Info("Start SearchUserIDByUsername in BeforeSTEP ");
                     string resultFinalSearchUserIDByUsername = string.Empty;
                     //todo string.empty   item.Username
                     string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsername_WebRequestCall(string.Empty, Username, out resultFinalSearchUserIDByUsername, out string statusCodeSearch, out string statusDescriptionSearch, out string resulNotOKsearch);
-                    string UserId = ParseResponse(resultFinalSearchUserIDByUsername);
+                    string UserId = ApiUtils.ParseJsonOneValue(resultFinalSearchUserIDByUsername, "userId");
                     log.Info("End SearchUserIDByUsername in BeforeSTEP. Response result is: " + UserId);
 
                     //SCIM UPDATE
@@ -191,11 +172,16 @@ public partial class EGovTest : System.Web.UI.Page
                     string UpdateResponseStatusExternal = statusCode + " " + statusDescription;
                     log.Info("End SCIM update user in BeforeSTEP. UserId is " + UserId);
                 }
+                ////////////////////////////////
 
                 string username = string.Empty;
                 if (MethodId == ConstantsProject.REGISTER_USER_ID)
                 {
-                    username = ParseRequestForUsername(item.RequestData);
+                    username = ApiUtils.ParseJsonTwoValues(item.RequestData, "user", "username");
+                }
+                if (MethodId == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME)
+                {
+                    username = ApiUtils.ParseJsonOneValue(item.RequestData, "username");
                 }
                 WebAPICalls(item.RequestData, username, MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome);
 
@@ -251,6 +237,11 @@ public partial class EGovTest : System.Web.UI.Page
                     Validate_WebAPICalls(jsonData, ConstantsProject.VALIDATE_UMCN_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End ValidateUMCN_WebAPICalls. ");
                     break;
+                case ConstantsProject.EXPORT_USER_INFO_BY_USERNAME:
+                    log.Info("Start ExportUserInfo_WebAPICalls. ");
+                    ExportUserInfo_WebAPICalls(jsonData, Username, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End ExportUserInfo_WebAPICalls. ");
+                    break;
                 case 10:
                     break;
             }
@@ -266,6 +257,37 @@ public partial class EGovTest : System.Web.UI.Page
         ResponseExternal = ResponseExternalEnd;
         ResponseStatusExternal = ResponseStatusExternalEnd;
         FinalOutcome = FinalOutcomeEnd;
+    }
+
+    protected void ExportUserInfo_WebAPICalls(string jsonData, string Username, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    {
+        Response = string.Empty;
+        ResponseStatus = string.Empty;
+        ResponseExternal = string.Empty;
+        ResponseStatusExternal = string.Empty;
+        FinalOutcome = false;
+
+        try
+        {
+            string resultFinalSearchUserIDByUsername = string.Empty;
+            //todo string.empty   item.Username
+            string SearchUserIDByUsername_Response = ApiUtils.ExportUserInfoByUsername_WebRequestCall(string.Empty, Username, out string resultFinalExport, out string statusCodeExport, out string statusDescriptionExport, out string resulNotOKExport);
+            ResponseStatus = statusCodeExport + " " + statusDescriptionExport;
+            if (Convert.ToInt32(statusCodeExport) == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME_ОК)
+            {
+                FinalOutcome = true;
+                Response = resultFinalExport;
+            }
+            else
+            {
+                Response = resulNotOKExport;
+            }
+            log.Info("ExportUserInfo API end. Response result is: " + Response + " " + ResponseStatus);
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error in function ExportUserInfo_WebAPICalls. " + ex.Message);
+        }
     }
 
 
@@ -300,7 +322,7 @@ public partial class EGovTest : System.Web.UI.Page
             string resultFinalSearchUserIDByUsername = string.Empty;
             //todo string.empty   item.Username
             string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsername_WebRequestCall(string.Empty, Username, out resultFinalSearchUserIDByUsername, out string statusCodeSearch, out string statusDescriptionSearch, out string resulNotOKsearch);
-            string UserId = ParseResponse(resultFinalSearchUserIDByUsername);
+            string UserId = ApiUtils.ParseJsonOneValue(resultFinalSearchUserIDByUsername, "userId");
             log.Info("End SearchUserIDByUsername. Response result is: " + UserId);
 
             if (UserId != string.Empty)
@@ -385,7 +407,7 @@ public partial class EGovTest : System.Web.UI.Page
                 }
                 else
                 {
-                    string statusCodeUMCN = ParseRequestForUMCN(resultResponse);
+                    string statusCodeUMCN = ApiUtils.ParseJsonOneValue(resultResponse, "statusCode");
                     log.Info("statusCode for UMCN is " + statusCodeUMCN); 
                     if (Convert.ToInt32(statusCodeUMCN) == ConstantsProject.VALIDATE_UMCN_ОК)
                     {
@@ -416,55 +438,6 @@ public partial class EGovTest : System.Web.UI.Page
             retValue = false;
         }
         return retValue;
-    }
-
-
-    protected string ParseResponse(string jsonResponse)
-    {
-        string res = string.Empty;
-
-        // Parse your Result to an Array
-        var x = JObject.Parse(jsonResponse);
-        var res1 = x["userId"];
-        res = res1.ToString();
-
-        return res;
-    }
-
-    protected string ParseRequestForUsername(string jsonResponse)
-    {
-        string res = string.Empty;
-
-        // Parse your Result to an Array
-        var x = JObject.Parse(jsonResponse);
-        var res1 = x["user"]["username"];
-        res = res1.ToString();
-
-        return res;
-    }
-
-    protected string ParseBeforeStepUsername(string jsonResponse)
-    {
-        string res = string.Empty;
-
-        // Parse your Result to an Array
-        var x = JObject.Parse(jsonResponse);
-        var res1 = x["userName"];
-        res = res1.ToString();
-
-        return res;
-    }
-
-    protected string ParseRequestForUMCN(string jsonResponse)
-    {
-        string res = string.Empty;
-
-        // Parse your Result to an Array
-        var x = JObject.Parse(jsonResponse);
-        var res1 = x["statusCode"];
-        res = res1.ToString();
-
-        return res;
     }
 
     protected void Cvmethod_ServerValidate(object source, ServerValidateEventArgs args)
