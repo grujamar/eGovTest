@@ -50,6 +50,11 @@ public static class ApiUtils
     public static string ExportUserInfoByUsername_Method_Out { get; set; }
     public static string ExportUserInfoByUsername_Username_Out { get; set; }
     public static string ExportUserInfoByUsername_Password_Out { get; set; }
+    public static string SearchUserIDByUMCN_Url_Out { get; set; }
+    public static string SearchUserIDByUMCN_ContentType_Out { get; set; }
+    public static string SearchUserIDByUMCN_Method_Out { get; set; }
+    public static string SearchUserIDByUMCN_Username_Out { get; set; }
+    public static string SearchUserIDByUMCN_Password_Out { get; set; }
     /******BASIC AUTH*******/
     public static string RegisterUser_BasicAuth { get; set; }
     public static string SearchUserIDByUsername_BasicAuth { get; set; }
@@ -58,6 +63,7 @@ public static class ApiUtils
     public static string ValidateUsername_BasicAuth { get; set; }
     public static string ValidateUMCN_BasicAuth { get; set; }
     public static string ExportUserInfoByUsername_BasicAuth { get; set; }
+    public static string SearchUserIDByUMCN_BasicAuth { get; set; }
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -167,6 +173,18 @@ public static class ApiUtils
                         ExportUserInfoByUsername_Username_Out = ExportUserInfoByUsername_Username_Out_Final;
                         ExportUserInfoByUsername_Password_Out = ExportUserInfoByUsername_Password_Out_Final;
                         ExportUserInfoByUsername_BasicAuth = ExportUserInfoByUsername_Username_Out + ":" + ExportUserInfoByUsername_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigatorMoveToNextLoop(navigator, 6);
+                    }
+                    if (navigator.Name == "SearchUserIDByUMCN")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string SearchUserIDByUMCN_Url_Out_Final, out string SearchUserIDByUMCN_ContentType_Out_Final, out string SearchUserIDByUMCN_Method_Out_Final, out string SearchUserIDByUMCN_Username_Out_Final, out string SearchUserIDByUMCN_Password_Out_Final);
+                        SearchUserIDByUMCN_Url_Out = SearchUserIDByUMCN_Url_Out_Final;
+                        SearchUserIDByUMCN_ContentType_Out = SearchUserIDByUMCN_ContentType_Out_Final;
+                        SearchUserIDByUMCN_Method_Out = SearchUserIDByUMCN_Method_Out_Final;
+                        SearchUserIDByUMCN_Username_Out = SearchUserIDByUMCN_Username_Out_Final;
+                        SearchUserIDByUMCN_Password_Out = SearchUserIDByUMCN_Password_Out_Final;
+                        SearchUserIDByUMCN_BasicAuth = SearchUserIDByUMCN_Username_Out + ":" + SearchUserIDByUMCN_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
                     }
                 } while (navigator.MoveToNext());
@@ -385,6 +403,24 @@ public static class ApiUtils
         /*******************************/
         return WebCall;
     }
+
+    public static string SearchUserIDByUMCN_WebRequestCall(string data, string umcn, out string result_Final_SearchUserIDByUMCN, out string StatusCode_Final_SearchUserIDByUMCN, out string StatusDescription_Final_SearchUserIDByUMCN, out string result_Final_NotOK)
+    {
+        StatusCode_Final_SearchUserIDByUMCN = string.Empty;
+        StatusDescription_Final_SearchUserIDByUMCN = string.Empty;
+        result_Final_SearchUserIDByUMCN = string.Empty;
+        result_Final_NotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, (SearchUserIDByUMCN_Url_Out + umcn), SearchUserIDByUMCN_Method_Out, SearchUserIDByUMCN_ContentType_Out, SearchUserIDByUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        StatusCode_Final_SearchUserIDByUMCN = StatusCodeFinal;
+        StatusDescription_Final_SearchUserIDByUMCN = StatusDescriptionFinal;
+        result_Final_SearchUserIDByUMCN = resultFinal;
+        result_Final_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
+
 
     public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
     {

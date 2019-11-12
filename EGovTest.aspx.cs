@@ -175,15 +175,20 @@ public partial class EGovTest : System.Web.UI.Page
                 ////////////////////////////////
 
                 string username = string.Empty;
+                string umcn = string.Empty;
                 if (MethodId == ConstantsProject.REGISTER_USER_ID)
                 {
                     username = ApiUtils.ParseJsonTwoValues(item.RequestData, "user", "username");
                 }
-                if (MethodId == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME)
+                if (MethodId == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME || MethodId == ConstantsProject.SEARCH_USER_ID_BY_USERNAME)
                 {
                     username = ApiUtils.ParseJsonOneValue(item.RequestData, "username");
                 }
-                WebAPICalls(item.RequestData, username, MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome);
+                if (MethodId == ConstantsProject.SEARCH_USER_ID_BY_UMCN)
+                {
+                    umcn = ApiUtils.ParseJsonOneValue(item.RequestData, "umcn");
+                }
+                WebAPICalls(item.RequestData, umcn, username, MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome);
 
                 log.Info("testCombinationFinish with parameters: " + " RequestData - " + item.RequestData + " Response - " + Response + " ResponseStatus - " + ResponseStatus + " ResponseExternal - " + ResponseExternal + " ResponseStatusExternal - " + ResponseStatusExternal + " FinalOutcome - " + FinalOutcome);
                 utility.testCombinationFinish(item.TestCombinationId, Response, ResponseStatus, ResponseExternal, ResponseStatusExternal, FinalOutcome, out result);
@@ -205,13 +210,16 @@ public partial class EGovTest : System.Web.UI.Page
         }
     }
 
-    protected void WebAPICalls(string jsonData, string Username, int MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    protected void WebAPICalls(string jsonData, string UMCN, string Username, int MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
     {
         string ResponseEnd = string.Empty;
         string ResponseStatusEnd = string.Empty;
         string ResponseExternalEnd = string.Empty;
         string ResponseStatusExternalEnd = string.Empty;
         bool FinalOutcomeEnd = false;
+
+        ///For only SEARCH_USER_ID_BY_USERNAME
+        bool FinalOutcomeSecondStep = false;
 
         try
         {
@@ -242,7 +250,17 @@ public partial class EGovTest : System.Web.UI.Page
                     ExportUserInfo_WebAPICalls(jsonData, Username, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End ExportUserInfo_WebAPICalls. ");
                     break;
-                case 10:
+                case ConstantsProject.SEARCH_USER_ID_BY_USERNAME:
+                    log.Info("Start SearchUserIdByUsername_WebAPICalls. ");
+                    SearchUserIDBy_WebAPICalls(string.Empty, Username, string.Empty, true, FinalOutcomeSecondStep, out FinalOutcomeEnd, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd);
+                    log.Info("End SearchUserIdByUsername_WebAPICalls. ");
+                    break;
+                case ConstantsProject.SEARCH_USER_ID_BY_UMCN:
+                    log.Info("Start SearchUserIdByUMCN_WebAPICalls. ");
+                    SearchUserIDBy_WebAPICalls(string.Empty, string.Empty, UMCN, true, FinalOutcomeSecondStep, out FinalOutcomeEnd, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd);
+                    log.Info("End SearchUserIdByUMCN_WebAPICalls. ");
+                    break;
+                case 15:
                     break;
             }
         }
@@ -300,6 +318,9 @@ public partial class EGovTest : System.Web.UI.Page
         FinalOutcome = false;
         bool FinalOutcomeFirstStep = false;
         bool FinalOutcomeSecondStep = false;
+        string jsonData_SearchUserIDByUsername = string.Empty;
+        string ResponseSearch = string.Empty;
+        string ResponseStatusSearch = string.Empty;
 
         try
         {
@@ -318,11 +339,41 @@ public partial class EGovTest : System.Web.UI.Page
             }
             log.Info("Register user API end. Response result is: " + Response + " " + ResponseStatus);
 
-            log.Info("Start SearchUserIDByUsername ");
-            string resultFinalSearchUserIDByUsername = string.Empty;
-            //todo string.empty   item.Username
-            string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsername_WebRequestCall(string.Empty, Username, out resultFinalSearchUserIDByUsername, out string statusCodeSearch, out string statusDescriptionSearch, out string resulNotOKsearch);
-            string UserId = ApiUtils.ParseJsonOneValue(resultFinalSearchUserIDByUsername, "userId");
+            SearchUserIDBy_WebAPICalls(jsonData_SearchUserIDByUsername, Username, string.Empty, FinalOutcomeFirstStep, FinalOutcomeSecondStep, out FinalOutcome, out ResponseSearch, out ResponseStatusSearch, out ResponseExternal, out ResponseStatusExternal);
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error in function RegisterUser_WebAPICalls. " + ex.Message);
+        }
+    }
+
+    protected void SearchUserIDBy_WebAPICalls(string jsonData, string Username, string UMCN, bool FinalOutcomeFirstStep, bool FinalOutcomeSecondStep, out bool FinalOutcome, out string statusCodeIDP, out string statusDescriptionIDP, out string ResponseExternal, out string ResponseStatusExternal)
+    {
+        statusCodeIDP = string.Empty;
+        statusDescriptionIDP = string.Empty;
+        ResponseExternal = string.Empty;
+        ResponseStatusExternal = string.Empty;
+        FinalOutcome = false;
+        string statusCodeSearch = string.Empty;
+        string statusDescriptionSearch = string.Empty;
+        string resulNotOKsearch = string.Empty;
+        string resultFinalSearchUserIDBy = string.Empty;
+
+        try
+        {
+            if (Username != string.Empty)
+            {
+                log.Info("Start SearchUserIDByUsername ");
+                string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsername_WebRequestCall(jsonData, Username, out resultFinalSearchUserIDBy, out statusCodeSearch, out statusDescriptionSearch, out resulNotOKsearch);
+            }
+            if (UMCN != string.Empty)
+            {
+                log.Info("Start SearchUserIDByUMCN ");
+                string SearchUserIDByUMCN_Response = ApiUtils.SearchUserIDByUMCN_WebRequestCall(jsonData, UMCN, out resultFinalSearchUserIDBy, out statusCodeSearch, out statusDescriptionSearch, out resulNotOKsearch);
+            }
+            statusCodeIDP = statusCodeSearch;
+            statusDescriptionIDP = statusDescriptionSearch;
+            string UserId = ApiUtils.ParseJsonOneValue(resultFinalSearchUserIDBy, "userId");
             log.Info("End SearchUserIDByUsername. Response result is: " + UserId);
 
             if (UserId != string.Empty)
@@ -344,9 +395,10 @@ public partial class EGovTest : System.Web.UI.Page
         }
         catch (Exception ex)
         {
-            log.Error("Error in function RegisterUser_WebAPICalls. " + ex.Message);
+            log.Error("Error in function SearchUserIDByUsername_WebAPICalls. " + ex.Message);
         }
     }
+
 
     protected void Validate_WebAPICalls(string jsonData, int methodID, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
     {
