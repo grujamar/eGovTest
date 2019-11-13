@@ -55,6 +55,11 @@ public static class ApiUtils
     public static string SearchUserIDByUMCN_Method_Out { get; set; }
     public static string SearchUserIDByUMCN_Username_Out { get; set; }
     public static string SearchUserIDByUMCN_Password_Out { get; set; }
+    public static string CreateUsersInBulk_Url_Out { get; set; }
+    public static string CreateUsersInBulk_ContentType_Out { get; set; }
+    public static string CreateUsersInBulk_Method_Out { get; set; }
+    public static string CreateUsersInBulk_Username_Out { get; set; }
+    public static string CreateUsersInBulk_Password_Out { get; set; }
     /******BASIC AUTH*******/
     public static string RegisterUser_BasicAuth { get; set; }
     public static string SearchUserIDByUsername_BasicAuth { get; set; }
@@ -64,6 +69,7 @@ public static class ApiUtils
     public static string ValidateUMCN_BasicAuth { get; set; }
     public static string ExportUserInfoByUsername_BasicAuth { get; set; }
     public static string SearchUserIDByUMCN_BasicAuth { get; set; }
+    public static string CreateUsersInBulk_BasicAuth { get; set; }
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -185,6 +191,18 @@ public static class ApiUtils
                         SearchUserIDByUMCN_Username_Out = SearchUserIDByUMCN_Username_Out_Final;
                         SearchUserIDByUMCN_Password_Out = SearchUserIDByUMCN_Password_Out_Final;
                         SearchUserIDByUMCN_BasicAuth = SearchUserIDByUMCN_Username_Out + ":" + SearchUserIDByUMCN_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigatorMoveToNextLoop(navigator, 7);
+                    }
+                    if (navigator.Name == "CreateUsersInBulk")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string CreateUsersInBulk_Url_Out_Final, out string CreateUsersInBulk_ContentType_Out_Final, out string CreateUsersInBulk_Method_Out_Final, out string CreateUsersInBulk_Username_Out_Final, out string CreateUsersInBulk_Password_Out_Final);
+                        CreateUsersInBulk_Url_Out = CreateUsersInBulk_Url_Out_Final;
+                        CreateUsersInBulk_ContentType_Out = CreateUsersInBulk_ContentType_Out_Final;
+                        CreateUsersInBulk_Method_Out = CreateUsersInBulk_Method_Out_Final;
+                        CreateUsersInBulk_Username_Out = CreateUsersInBulk_Username_Out_Final;
+                        CreateUsersInBulk_Password_Out = CreateUsersInBulk_Password_Out_Final;
+                        CreateUsersInBulk_BasicAuth = CreateUsersInBulk_Username_Out + ":" + CreateUsersInBulk_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
                     }
                 } while (navigator.MoveToNext());
@@ -421,6 +439,23 @@ public static class ApiUtils
         return WebCall;
     }
 
+    public static string CreateUsersInBulk_WebRequestCall(string data, out string result_Final_CreateUsersInBulk, out string StatusCode_Final_CreateUsersInBulk, out string StatusDescription_Final_CreateUsersInBulk, out string result_Final_NotOK)
+    {
+        StatusCode_Final_CreateUsersInBulk = string.Empty;
+        StatusDescription_Final_CreateUsersInBulk = string.Empty;
+        result_Final_CreateUsersInBulk = string.Empty;
+        result_Final_NotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, CreateUsersInBulk_Url_Out, CreateUsersInBulk_Method_Out, CreateUsersInBulk_ContentType_Out, CreateUsersInBulk_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        StatusCode_Final_CreateUsersInBulk = StatusCodeFinal;
+        StatusDescription_Final_CreateUsersInBulk = StatusDescriptionFinal;
+        result_Final_CreateUsersInBulk = resultFinal;
+        result_Final_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
+
 
     public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
     {
@@ -438,6 +473,7 @@ public static class ApiUtils
             ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
 
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(apiUrl);
+            httpWebRequest.Timeout = 300000; //300sec
             httpWebRequest.ContentType = apiContentType;
             httpWebRequest.Method = apiMethod;
 
@@ -460,7 +496,9 @@ public static class ApiUtils
 
             try
             {
+                log.Info("Before getting response. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
                 var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                log.Info("After getting response. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
                 GetStatusAndDescriptionCode(httpResponse, out string StatusCode, out string StatusDescription);
                 StatusCodeFinal = StatusCode;
                 StatusDescriptionFinal = StatusDescription;
@@ -473,7 +511,6 @@ public static class ApiUtils
             }
             catch (WebException ex)
             {
-
                 log.Info("Web exception happened: " + ex.Message);
                 using (WebResponse response = ex.Response)
                 { 

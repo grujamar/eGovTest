@@ -418,6 +418,45 @@ public class ProjectUtility
         return MethodName;
     }
 
+
+
+
+
+    public string spBulkSet()
+    {
+        string test = string.Empty;
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand("spBulkInsert", objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = CommandType.StoredProcedure;
+
+                    objCmd.Parameters.Add("@err", System.Data.SqlDbType.Int);
+                    objCmd.Parameters["@err"].Direction = ParameterDirection.ReturnValue;
+
+                    objConn.Open();
+                    SqlDataReader reader = objCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        test = reader.GetSqlString(0).ToString();
+                    }
+
+                    objConn.Close();
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in function spBulkSet. " + ex.Message);
+                    throw new Exception("Error in function spBulkSet. " + ex.Message);
+                }
+            }
+        }
+
+        return test;
+    }
+
 }
 /*
 public void loginAdmin(string Username, string Password, out int IDLogAdmin, out int result)

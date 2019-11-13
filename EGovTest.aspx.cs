@@ -38,6 +38,7 @@ public partial class EGovTest : System.Web.UI.Page
             ChangeVisibility(true);
             Session["EGovTest_ddlSelectedValue"] = 0;
             btnDeleteUsersOnSCIM.Enabled = false;
+            btnBulkOnSCIM.Enabled = false;
         }
     }
 
@@ -689,10 +690,60 @@ public partial class EGovTest : System.Web.UI.Page
         if (CheckBox1.Checked == true)
         {
             btnDeleteUsersOnSCIM.Enabled = true;
+            btnBulkOnSCIM.Enabled = true;
         }
         else
         {
             btnDeleteUsersOnSCIM.Enabled = false;
+            btnBulkOnSCIM.Enabled = false;
+        }
+    }
+
+    protected void btnBulkOnSCIM_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            string Response = string.Empty;
+            string ResponseStatus = string.Empty;
+            string ResponseExternal = string.Empty;
+            string ResponseStatusExternal = string.Empty;
+            bool FinalOutcome = false;
+            bool FinalOutcomeFirstStep = false;
+            bool FinalOutcomeSecondStep = false;
+            string jsonData_SearchUserIDByUsername = string.Empty;
+            string ResponseSearch = string.Empty;
+            string ResponseStatusSearch = string.Empty;
+
+            ProjectUtility utility = new ProjectUtility();
+            string jsonDataResult = utility.spBulkSet();
+
+            //log.Info("request data is " + jsonDataResult);
+
+             string jsonDataSCIM_BULK_Replace = jsonDataResult.Replace(@"""""", @"""");
+
+            //log.Info("request data is " + jsonDataSCIM_BULK_Replace);
+
+            log.Info("Register user in BULK start. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
+            string RegisterUser_Response = ApiUtils.CreateUsersInBulk_WebRequestCall(jsonDataSCIM_BULK_Replace, out string resultResponse, out string statusCode, out string statusDescription, out string resulNotOK);
+            log.Info("Register user in BULK end1. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
+            ResponseStatus = statusCode + " " + statusDescription;
+            if (Convert.ToInt32(statusCode) == ConstantsProject.REGISTER_USER_ОК)
+            {
+                FinalOutcomeFirstStep = true;
+                Response = resultResponse;
+            }
+            else
+            {
+                Response = resulNotOK;
+            }
+            log.Info("Register user in BULK end2. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
+            //log.Info("Register user in BULK end. Response result is: " + Response + " " + ResponseStatus);
+            ScriptManager.RegisterStartupScript(this, GetType(), "SuccessSendingData", "SuccessSendingData();", true);
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error on click btnBulkOnSCIM. " + ex.Message);
+            ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
         }
     }
 }
