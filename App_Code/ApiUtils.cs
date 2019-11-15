@@ -60,6 +60,11 @@ public static class ApiUtils
     public static string CreateUsersInBulk_Method_Out { get; set; }
     public static string CreateUsersInBulk_Username_Out { get; set; }
     public static string CreateUsersInBulk_Password_Out { get; set; }
+    public static string ExportAuthInfo_Url_Out { get; set; }
+    public static string ExportAuthInfo_ContentType_Out { get; set; }
+    public static string ExportAuthInfo_Method_Out { get; set; }
+    public static string ExportAuthInfo_Username_Out { get; set; }
+    public static string ExportAuthInfo_Password_Out { get; set; }
     /******BASIC AUTH*******/
     public static string RegisterUser_BasicAuth { get; set; }
     public static string SearchUserIDByUsername_BasicAuth { get; set; }
@@ -70,6 +75,7 @@ public static class ApiUtils
     public static string ExportUserInfoByUsername_BasicAuth { get; set; }
     public static string SearchUserIDByUMCN_BasicAuth { get; set; }
     public static string CreateUsersInBulk_BasicAuth { get; set; }
+    public static string ExportAuthInfo_BasicAuth { get; set; }
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -203,6 +209,18 @@ public static class ApiUtils
                         CreateUsersInBulk_Username_Out = CreateUsersInBulk_Username_Out_Final;
                         CreateUsersInBulk_Password_Out = CreateUsersInBulk_Password_Out_Final;
                         CreateUsersInBulk_BasicAuth = CreateUsersInBulk_Username_Out + ":" + CreateUsersInBulk_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigatorMoveToNextLoop(navigator, 8);
+                    }
+                    if (navigator.Name == "ExportAuthInfo")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string ExportAuthInfo_Url_Out_Final, out string ExportAuthInfo_ContentType_Out_Final, out string ExportAuthInfo_Method_Out_Final, out string ExportAuthInfo_Username_Out_Final, out string ExportAuthInfo_Password_Out_Final);
+                        ExportAuthInfo_Url_Out = ExportAuthInfo_Url_Out_Final;
+                        ExportAuthInfo_ContentType_Out = ExportAuthInfo_ContentType_Out_Final;
+                        ExportAuthInfo_Method_Out = ExportAuthInfo_Method_Out_Final;
+                        ExportAuthInfo_Username_Out = ExportAuthInfo_Username_Out_Final;
+                        ExportAuthInfo_Password_Out = ExportAuthInfo_Password_Out_Final;
+                        ExportAuthInfo_BasicAuth = ExportAuthInfo_Username_Out + ":" + ExportAuthInfo_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
                     }
                 } while (navigator.MoveToNext());
@@ -456,6 +474,23 @@ public static class ApiUtils
         return WebCall;
     }
 
+
+    public static string ExportAuthInfo_WebRequestCall(string data, string username, out string result_Final_ExportAuthInfo, out string StatusCode_Final_ExportAuthInfo, out string StatusDescription_Final_ExportAuthInfo, out string resultFinal_NotOK)
+    {
+        result_Final_ExportAuthInfo = string.Empty;
+        StatusCode_Final_ExportAuthInfo = string.Empty;
+        StatusDescription_Final_ExportAuthInfo = string.Empty;
+        resultFinal_NotOK = string.Empty;
+        /*******************************/
+        string WebCall = WebRequestCall(data, (ExportAuthInfo_Url_Out + username), ExportAuthInfo_Method_Out, ExportAuthInfo_ContentType_Out, ExportAuthInfo_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        result_Final_ExportAuthInfo = resultFinal;
+        StatusCode_Final_ExportAuthInfo = StatusCodeFinal;
+        StatusDescription_Final_ExportAuthInfo = StatusDescriptionFinal;
+        resultFinal_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
 
     public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
     {

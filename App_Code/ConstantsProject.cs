@@ -23,6 +23,7 @@ public class ConstantsProject
     public const int EXPORT_USER_INFO_BY_USERNAME = 7;
     public const int SEARCH_USER_ID_BY_USERNAME = 8;
     public const int SEARCH_USER_ID_BY_UMCN = 9;
+    public const int EXPORT_AUTH_INFO_BY_USERNAME = 10;
     /// <summary>
     /// ////////
     /// </summary>
@@ -37,4 +38,5 @@ public class ConstantsProject
     public const int VALIDATE_UMCN_ОК = 60000;
 
     public const int EXPORT_USER_INFO_BY_USERNAME_ОК = 200;
+    public const int EXPORT_AUTH_INFO_BY_USERNAME_ОК = 200;
 }

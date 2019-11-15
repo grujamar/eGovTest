@@ -181,7 +181,7 @@ public partial class EGovTest : System.Web.UI.Page
                 {
                     username = ApiUtils.ParseJsonTwoValues(item.RequestData, "user", "username");
                 }
-                if (MethodId == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME || MethodId == ConstantsProject.SEARCH_USER_ID_BY_USERNAME)
+                if (MethodId == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME || MethodId == ConstantsProject.SEARCH_USER_ID_BY_USERNAME || MethodId == ConstantsProject.EXPORT_AUTH_INFO_BY_USERNAME)
                 {
                     username = ApiUtils.ParseJsonOneValue(item.RequestData, "username");
                 }
@@ -248,7 +248,7 @@ public partial class EGovTest : System.Web.UI.Page
                     break;
                 case ConstantsProject.EXPORT_USER_INFO_BY_USERNAME:
                     log.Info("Start ExportUserInfo_WebAPICalls. ");
-                    ExportUserInfo_WebAPICalls(jsonData, Username, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    ExportInfo_WebAPICalls(jsonData, Username, ConstantsProject.EXPORT_USER_INFO_BY_USERNAME, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End ExportUserInfo_WebAPICalls. ");
                     break;
                 case ConstantsProject.SEARCH_USER_ID_BY_USERNAME:
@@ -260,6 +260,11 @@ public partial class EGovTest : System.Web.UI.Page
                     log.Info("Start SearchUserIdByUMCN_WebAPICalls. ");
                     SearchUserIDBy_WebAPICalls(string.Empty, string.Empty, UMCN, true, FinalOutcomeSecondStep, out FinalOutcomeEnd, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd);
                     log.Info("End SearchUserIdByUMCN_WebAPICalls. ");
+                    break;
+                case ConstantsProject.EXPORT_AUTH_INFO_BY_USERNAME:
+                    log.Info("Start ExportAuthInfo_WebAPICalls. ");
+                    ExportInfo_WebAPICalls(jsonData, Username, ConstantsProject.EXPORT_AUTH_INFO_BY_USERNAME, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End ExportAuthInfo_WebAPICalls. ");
                     break;
                 case 15:
                     break;
@@ -278,21 +283,33 @@ public partial class EGovTest : System.Web.UI.Page
         FinalOutcome = FinalOutcomeEnd;
     }
 
-    protected void ExportUserInfo_WebAPICalls(string jsonData, string Username, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    protected void ExportInfo_WebAPICalls(string jsonData, string Username, int MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
     {
         Response = string.Empty;
         ResponseStatus = string.Empty;
         ResponseExternal = string.Empty;
         ResponseStatusExternal = string.Empty;
         FinalOutcome = false;
+        string resultFinalExport = string.Empty;
+        string statusCodeExport = string.Empty;
+        string statusDescriptionExport = string.Empty;
+        string resulNotOKExport = string.Empty;
 
         try
         {
             string resultFinalSearchUserIDByUsername = string.Empty;
             //todo string.empty   item.Username
-            string SearchUserIDByUsername_Response = ApiUtils.ExportUserInfoByUsername_WebRequestCall(string.Empty, Username, out string resultFinalExport, out string statusCodeExport, out string statusDescriptionExport, out string resulNotOKExport);
+
+            if (MethodId == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME)
+            {
+                string SearchUserIDByUsername_Response = ApiUtils.ExportUserInfoByUsername_WebRequestCall(string.Empty, Username, out resultFinalExport, out statusCodeExport, out statusDescriptionExport, out resulNotOKExport);
+            }
+            if (MethodId == ConstantsProject.EXPORT_AUTH_INFO_BY_USERNAME)
+            {
+                string ExportAuthInfoByUsername_Response = ApiUtils.ExportAuthInfo_WebRequestCall(string.Empty, Username, out resultFinalExport, out statusCodeExport, out statusDescriptionExport, out resulNotOKExport);
+            }
             ResponseStatus = statusCodeExport + " " + statusDescriptionExport;
-            if (Convert.ToInt32(statusCodeExport) == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME_ОК)
+            if ((Convert.ToInt32(statusCodeExport) == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME_ОК) || (Convert.ToInt32(statusCodeExport) == ConstantsProject.EXPORT_AUTH_INFO_BY_USERNAME_ОК))
             {
                 FinalOutcome = true;
                 Response = resultFinalExport;
@@ -301,11 +318,11 @@ public partial class EGovTest : System.Web.UI.Page
             {
                 Response = resulNotOKExport;
             }
-            log.Info("ExportUserInfo API end. Response result is: " + Response + " " + ResponseStatus);
+            log.Info("ExportInfo API end. Response result is: " + Response + " " + ResponseStatus);
         }
         catch (Exception ex)
         {
-            log.Error("Error in function ExportUserInfo_WebAPICalls. " + ex.Message);
+            log.Error("Error in function ExportInfo_WebAPICalls. " + ex.Message);
         }
     }
 
