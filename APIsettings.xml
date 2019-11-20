@@ -70,4 +70,18 @@
     <username></username>
     <password></password>
   </ExportAuthInfo>
+  <AddAuthentication>
+    <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/add-authentication</url>
+    <contentType>application/json</contentType>
+    <method>POST</method>
+    <username></username>
+    <password></password>
+  </AddAuthentication>
+  <RemoveAuthentication>
+    <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/remove-authentication</url>
+    <contentType>application/json</contentType>
+    <method>POST</method>
+    <username></username>
+    <password></password>
+  </RemoveAuthentication>
 </parameters>

@@ -24,6 +24,8 @@ public class ConstantsProject
     public const int SEARCH_USER_ID_BY_USERNAME = 8;
     public const int SEARCH_USER_ID_BY_UMCN = 9;
     public const int EXPORT_AUTH_INFO_BY_USERNAME = 10;
+    public const int ADD_AUTHENTICATION_METHOD_ID = 11;
+    public const int REMOVE_AUTHENTICATION_METHOD_ID = 12;
     /// <summary>
     /// ////////
     /// </summary>
@@ -35,8 +37,10 @@ public class ConstantsProject
     public const int VALIDATE_CODE_ОК = 202;
     public const int VALIDATE_USERNAME_ОК = 200;
 
-    public const int VALIDATE_UMCN_ОК = 60000;
+    public const int VALIDATE_UMCN_USERNAME_ОК = 60000;
 
     public const int EXPORT_USER_INFO_BY_USERNAME_ОК = 200;
     public const int EXPORT_AUTH_INFO_BY_USERNAME_ОК = 200;
+    public const int ADD_AUTHENTICATION_ОК = 200;
+    public const int REMOVE_AUTHENTICATION_ОК = 204;
 }

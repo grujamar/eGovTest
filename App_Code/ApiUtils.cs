@@ -65,6 +65,16 @@ public static class ApiUtils
     public static string ExportAuthInfo_Method_Out { get; set; }
     public static string ExportAuthInfo_Username_Out { get; set; }
     public static string ExportAuthInfo_Password_Out { get; set; }
+    public static string AddAuthentication_Url_Out { get; set; }
+    public static string AddAuthentication_ContentType_Out { get; set; }
+    public static string AddAuthentication_Method_Out { get; set; }
+    public static string AddAuthentication_Username_Out { get; set; }
+    public static string AddAuthentication_Password_Out { get; set; }
+    public static string RemoveAuthentication_Url_Out { get; set; }
+    public static string RemoveAuthentication_ContentType_Out { get; set; }
+    public static string RemoveAuthentication_Method_Out { get; set; }
+    public static string RemoveAuthentication_Username_Out { get; set; }
+    public static string RemoveAuthentication_Password_Out { get; set; }
     /******BASIC AUTH*******/
     public static string RegisterUser_BasicAuth { get; set; }
     public static string SearchUserIDByUsername_BasicAuth { get; set; }
@@ -76,6 +86,8 @@ public static class ApiUtils
     public static string SearchUserIDByUMCN_BasicAuth { get; set; }
     public static string CreateUsersInBulk_BasicAuth { get; set; }
     public static string ExportAuthInfo_BasicAuth { get; set; }
+    public static string AddAuthentication_BasicAuth { get; set; }
+    public static string RemoveAuthentication_BasicAuth { get; set; }
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -222,6 +234,30 @@ public static class ApiUtils
                         ExportAuthInfo_Password_Out = ExportAuthInfo_Password_Out_Final;
                         ExportAuthInfo_BasicAuth = ExportAuthInfo_Username_Out + ":" + ExportAuthInfo_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigatorMoveToNextLoop(navigator, 9);
+                    }
+                    if (navigator.Name == "AddAuthentication")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string AddAuthentication_Url_Out_Final, out string AddAuthentication_ContentType_Out_Final, out string AddAuthentication_Method_Out_Final, out string AddAuthentication_Username_Out_Final, out string AddAuthentication_Password_Out_Final);
+                        AddAuthentication_Url_Out = AddAuthentication_Url_Out_Final;
+                        AddAuthentication_ContentType_Out = AddAuthentication_ContentType_Out_Final;
+                        AddAuthentication_Method_Out = AddAuthentication_Method_Out_Final;
+                        AddAuthentication_Username_Out = AddAuthentication_Username_Out_Final;
+                        AddAuthentication_Password_Out = AddAuthentication_Password_Out_Final;
+                        AddAuthentication_BasicAuth = AddAuthentication_Username_Out + ":" + AddAuthentication_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigatorMoveToNextLoop(navigator, 10);
+                    }
+                    if (navigator.Name == "RemoveAuthentication")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string RemoveAuthentication_Url_Out_Final, out string RemoveAuthentication_ContentType_Out_Final, out string RemoveAuthentication_Method_Out_Final, out string RemoveAuthentication_Username_Out_Final, out string RemoveAuthentication_Password_Out_Final);
+                        RemoveAuthentication_Url_Out = RemoveAuthentication_Url_Out_Final;
+                        RemoveAuthentication_ContentType_Out = RemoveAuthentication_ContentType_Out_Final;
+                        RemoveAuthentication_Method_Out = RemoveAuthentication_Method_Out_Final;
+                        RemoveAuthentication_Username_Out = RemoveAuthentication_Username_Out_Final;
+                        RemoveAuthentication_Password_Out = RemoveAuthentication_Password_Out_Final;
+                        RemoveAuthentication_BasicAuth = RemoveAuthentication_Username_Out + ":" + RemoveAuthentication_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
                     }
                 } while (navigator.MoveToNext());
             }
@@ -288,10 +324,6 @@ public static class ApiUtils
 
     public static string RegisterUser_WebRequestCall(string data, out string result_Final_RegisterUser, out string StatusCode_Final_RegisterUser, out string StatusDescription_Final_RegisterUser, out string result_Final_NotOK)
     {
-        StatusCode_Final_RegisterUser = string.Empty;
-        StatusDescription_Final_RegisterUser = string.Empty;
-        result_Final_RegisterUser = string.Empty;
-        result_Final_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, RegisterUser_Url_Out, RegisterUser_Method_Out, RegisterUser_ContentType_Out, RegisterUser_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -305,10 +337,6 @@ public static class ApiUtils
 
     public static string SearchUserIDByUsername_WebRequestCall(string data, string username, out string result_Final_SearchUserIDByUsername, out string StatusCode_Final_SearchUserIDByUsername, out string StatusDescription_Final_SearchUserIDByUsername, out string result_Final_NotOK)
     {
-        StatusCode_Final_SearchUserIDByUsername = string.Empty;
-        StatusDescription_Final_SearchUserIDByUsername = string.Empty;
-        result_Final_SearchUserIDByUsername = string.Empty;
-        result_Final_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, (SearchUserIDByUsername_Url_Out + username), SearchUserIDByUsername_Method_Out, SearchUserIDByUsername_ContentType_Out, SearchUserIDByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -322,10 +350,6 @@ public static class ApiUtils
 
     public static string SCIMcheckData_WebRequestCall(string data, string UserID, string Method, out string result_Final_SCIMcheckData, out string StatusCode_Final_SCIMcheckData, out string StatusDescription_Final_SCIMcheckData, out string result_Final_NotOK)
     {
-        StatusCode_Final_SCIMcheckData = string.Empty;
-        StatusDescription_Final_SCIMcheckData = string.Empty;
-        result_Final_SCIMcheckData = string.Empty;
-        result_Final_NotOK = string.Empty;
         string WebCall = string.Empty;
         /*******************************/
         if (Method == ConstantsProject.DELETE_METHOD)
@@ -357,10 +381,6 @@ public static class ApiUtils
 
     public static string SCIMcheckData_WebRequestCall_All(string data, out string result_Final_SCIMcheckData_All, out string StatusCode_Final_SCIMcheckData_All, out string StatusDescription_Final_SCIMcheckData_All, out string result_Final_NotOK)
     {
-        StatusCode_Final_SCIMcheckData_All = string.Empty;
-        StatusDescription_Final_SCIMcheckData_All = string.Empty;
-        result_Final_SCIMcheckData_All = string.Empty;
-        result_Final_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, SCIMcheckData_Url_Out, SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -374,10 +394,6 @@ public static class ApiUtils
 
     public static string ValidateCode_WebRequestCall(string data, out string result_Final_ValidateCode, out string StatusCode_Final_ValidateCode, out string StatusDescription_Final_ValidateCode, out string resultFinal_NotOK)
     {
-        result_Final_ValidateCode = string.Empty;
-        StatusCode_Final_ValidateCode = string.Empty;
-        StatusDescription_Final_ValidateCode = string.Empty;
-        resultFinal_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, ValidateCode_Url_Out, ValidateCode_Method_Out, ValidateCode_ContentType_Out, ValidateCode_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -391,10 +407,6 @@ public static class ApiUtils
 
     public static string ValidateUsername_WebRequestCall(string data, out string result_Final_ValidateUsername, out string StatusCode_Final_ValidateUsername, out string StatusDescription_Final_ValidateUsername, out string resultFinal_NotOK)
     {
-        result_Final_ValidateUsername = string.Empty;
-        StatusCode_Final_ValidateUsername = string.Empty;
-        StatusDescription_Final_ValidateUsername = string.Empty;
-        resultFinal_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, ValidateUsername_Url_Out, ValidateUsername_Method_Out, ValidateUsername_ContentType_Out, ValidateUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -408,10 +420,6 @@ public static class ApiUtils
 
     public static string ValidateUMCN_WebRequestCall(string data, out string result_Final_ValidateUMCN, out string StatusCode_Final_ValidateUMCN, out string StatusDescription_Final_ValidateUMCN, out string resultFinal_NotOK)
     {
-        result_Final_ValidateUMCN = string.Empty;
-        StatusCode_Final_ValidateUMCN = string.Empty;
-        StatusDescription_Final_ValidateUMCN = string.Empty;
-        resultFinal_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, ValidateUMCN_Url_Out, ValidateUMCN_Method_Out, ValidateUMCN_ContentType_Out, ValidateUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -425,10 +433,6 @@ public static class ApiUtils
 
     public static string ExportUserInfoByUsername_WebRequestCall(string data, string username, out string result_Final_ExportUserInfoByUsername, out string StatusCode_Final_ExportUserInfoByUsername, out string StatusDescription_Final_ExportUserInfoByUsername, out string resultFinal_NotOK)
     {
-        result_Final_ExportUserInfoByUsername = string.Empty;
-        StatusCode_Final_ExportUserInfoByUsername = string.Empty;
-        StatusDescription_Final_ExportUserInfoByUsername = string.Empty;
-        resultFinal_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, (ExportUserInfoByUsername_Url_Out + username), ExportUserInfoByUsername_Method_Out, ExportUserInfoByUsername_ContentType_Out, ExportUserInfoByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -442,10 +446,6 @@ public static class ApiUtils
 
     public static string SearchUserIDByUMCN_WebRequestCall(string data, string umcn, out string result_Final_SearchUserIDByUMCN, out string StatusCode_Final_SearchUserIDByUMCN, out string StatusDescription_Final_SearchUserIDByUMCN, out string result_Final_NotOK)
     {
-        StatusCode_Final_SearchUserIDByUMCN = string.Empty;
-        StatusDescription_Final_SearchUserIDByUMCN = string.Empty;
-        result_Final_SearchUserIDByUMCN = string.Empty;
-        result_Final_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, (SearchUserIDByUMCN_Url_Out + umcn), SearchUserIDByUMCN_Method_Out, SearchUserIDByUMCN_ContentType_Out, SearchUserIDByUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -459,10 +459,6 @@ public static class ApiUtils
 
     public static string CreateUsersInBulk_WebRequestCall(string data, out string result_Final_CreateUsersInBulk, out string StatusCode_Final_CreateUsersInBulk, out string StatusDescription_Final_CreateUsersInBulk, out string result_Final_NotOK)
     {
-        StatusCode_Final_CreateUsersInBulk = string.Empty;
-        StatusDescription_Final_CreateUsersInBulk = string.Empty;
-        result_Final_CreateUsersInBulk = string.Empty;
-        result_Final_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, CreateUsersInBulk_Url_Out, CreateUsersInBulk_Method_Out, CreateUsersInBulk_ContentType_Out, CreateUsersInBulk_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -477,10 +473,6 @@ public static class ApiUtils
 
     public static string ExportAuthInfo_WebRequestCall(string data, string username, out string result_Final_ExportAuthInfo, out string StatusCode_Final_ExportAuthInfo, out string StatusDescription_Final_ExportAuthInfo, out string resultFinal_NotOK)
     {
-        result_Final_ExportAuthInfo = string.Empty;
-        StatusCode_Final_ExportAuthInfo = string.Empty;
-        StatusDescription_Final_ExportAuthInfo = string.Empty;
-        resultFinal_NotOK = string.Empty;
         /*******************************/
         string WebCall = WebRequestCall(data, (ExportAuthInfo_Url_Out + username), ExportAuthInfo_Method_Out, ExportAuthInfo_ContentType_Out, ExportAuthInfo_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
@@ -491,6 +483,33 @@ public static class ApiUtils
         /*******************************/
         return WebCall;
     }
+
+    public static string AddAuthentication_WebRequestCall(string data, out string result_Final_AddAuthentication, out string StatusCode_Final_AddAuthentication, out string StatusDescription_Final_AddAuthentication, out string resultFinal_NotOK)
+    {
+        /*******************************/
+        string WebCall = WebRequestCall(data, AddAuthentication_Url_Out, AddAuthentication_Method_Out, AddAuthentication_ContentType_Out, AddAuthentication_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        result_Final_AddAuthentication = resultFinal;
+        StatusCode_Final_AddAuthentication = StatusCodeFinal;
+        StatusDescription_Final_AddAuthentication = StatusDescriptionFinal;
+        resultFinal_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
+
+    public static string RemoveAuthentication_WebRequestCall(string data, out string result_Final_RemoveAuthentication, out string StatusCode_Final_RemoveAuthentication, out string StatusDescription_Final_RemoveAuthentication, out string resultFinal_NotOK)
+    {
+        /*******************************/
+        string WebCall = WebRequestCall(data, RemoveAuthentication_Url_Out, RemoveAuthentication_Method_Out, RemoveAuthentication_ContentType_Out, RemoveAuthentication_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        result_Final_RemoveAuthentication = resultFinal;
+        StatusCode_Final_RemoveAuthentication = StatusCodeFinal;
+        StatusDescription_Final_RemoveAuthentication = StatusDescriptionFinal;
+        resultFinal_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
+
 
     public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
     {

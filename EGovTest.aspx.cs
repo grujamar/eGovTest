@@ -150,7 +150,7 @@ public partial class EGovTest : System.Web.UI.Page
                     throw new Exception("Error while trying to start combination. Result is: " + result);
                 }
 
-                /////////BEFORE STEP////////////
+                /////////BEFORE STEP-ONLY FOR REGISTER USER////////////
                 if (!item.BeforeStep.Equals("-"))
                 {
                     log.Info("BeforeSTEP. Request is " + item.BeforeStep);
@@ -265,6 +265,16 @@ public partial class EGovTest : System.Web.UI.Page
                     log.Info("Start ExportAuthInfo_WebAPICalls. ");
                     ExportInfo_WebAPICalls(jsonData, Username, ConstantsProject.EXPORT_AUTH_INFO_BY_USERNAME, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End ExportAuthInfo_WebAPICalls. ");
+                    break;
+                case ConstantsProject.ADD_AUTHENTICATION_METHOD_ID:
+                    log.Info("Start AddAuthentication_WebAPICalls. ");
+                    Validate_WebAPICalls(jsonData, ConstantsProject.ADD_AUTHENTICATION_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End AddAuthentication_WebAPICalls. ");
+                    break;
+                case ConstantsProject.REMOVE_AUTHENTICATION_METHOD_ID:
+                    log.Info("Start RemoveAuthentication_WebAPICalls. ");
+                    Validate_WebAPICalls(jsonData, ConstantsProject.REMOVE_AUTHENTICATION_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End RemoveAuthentication_WebAPICalls. ");
                     break;
                 case 15:
                     break;
@@ -437,17 +447,27 @@ public partial class EGovTest : System.Web.UI.Page
             if (methodID == ConstantsProject.VALIDATE_CODE_METHOD_ID)
             {
                 string ValidateCode_Response = ApiUtils.ValidateCode_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
-                ApiResponse(statusCode, ConstantsProject.VALIDATE_CODE_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
+                ApiResponse(methodID, statusCode, ConstantsProject.VALIDATE_CODE_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
             }
             else if (methodID == ConstantsProject.VALIDATE_USERNAME_METHOD_ID)
             {
                 string ValidateUsername_Response = ApiUtils.ValidateUsername_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
-                ApiResponse(statusCode, ConstantsProject.VALIDATE_USERNAME_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
+                ApiResponse(methodID, statusCode, ConstantsProject.VALIDATE_USERNAME_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
             }
             else if (methodID == ConstantsProject.VALIDATE_UMCN_METHOD_ID)
             {
                 string ValidateUMCN_Response = ApiUtils.ValidateUMCN_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
-                ApiResponse(statusCode, ConstantsProject.VALIDATE_USERNAME_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
+                ApiResponse(methodID, statusCode, ConstantsProject.VALIDATE_USERNAME_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
+            }
+            else if (methodID == ConstantsProject.ADD_AUTHENTICATION_METHOD_ID)
+            {
+                string AddAuthentication_Response = ApiUtils.AddAuthentication_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
+                ApiResponse(methodID, statusCode, ConstantsProject.ADD_AUTHENTICATION_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
+            }
+            else if (methodID == ConstantsProject.REMOVE_AUTHENTICATION_METHOD_ID)
+            {
+                string RemoveAuthentication_Response = ApiUtils.RemoveAuthentication_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
+                ApiResponse(methodID, statusCode, ConstantsProject.REMOVE_AUTHENTICATION_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
             }
             log.Info("Validate API for method " + methodID + " end. Response result is: " + Response + " " + ResponseStatus);
 
@@ -460,7 +480,7 @@ public partial class EGovTest : System.Web.UI.Page
         }
     }
 
-    protected void ApiResponse(string statusCode, int responseResultOK, string resultResponse, string statusDescription, string resulNotOK, out string ResponseStatus, out bool FinalOutcomeFirstStep, out string Response)
+    protected void ApiResponse(int methodId, string statusCode, int responseResultOK, string resultResponse, string statusDescription, string resulNotOK, out string ResponseStatus, out bool FinalOutcomeFirstStep, out string Response)
     {
         ResponseStatus = string.Empty;
         FinalOutcomeFirstStep = false;
@@ -477,9 +497,16 @@ public partial class EGovTest : System.Web.UI.Page
                 }
                 else
                 {
-                    string statusCodeUMCN = ApiUtils.ParseJsonOneValue(resultResponse, "statusCode");
-                    log.Info("statusCode for UMCN is " + statusCodeUMCN); 
-                    if (Convert.ToInt32(statusCodeUMCN) == ConstantsProject.VALIDATE_UMCN_ОК)
+                    if (methodId != ConstantsProject.ADD_AUTHENTICATION_METHOD_ID || methodId != ConstantsProject.REMOVE_AUTHENTICATION_METHOD_ID)
+                    {
+                        string statusCodes = ApiUtils.ParseJsonOneValue(resultResponse, "statusCode");
+                        log.Info("statusCode for is " + statusCodes);
+                        if (Convert.ToInt32(statusCodes) == ConstantsProject.VALIDATE_UMCN_USERNAME_ОК)
+                        {
+                            FinalOutcomeFirstStep = true;
+                        }
+                    }
+                    else
                     {
                         FinalOutcomeFirstStep = true;
                     }
