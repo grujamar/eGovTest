@@ -2,9 +2,11 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -37,8 +39,8 @@ public partial class EGovTest : System.Web.UI.Page
             log.Info(pageName + " page start.");
             ChangeVisibility(true);
             Session["EGovTest_ddlSelectedValue"] = 0;
-            btnDeleteUsersOnSCIM.Enabled = false;
-            btnBulkOnSCIM.Enabled = false;
+            isEnabledButtons(false);
+            uploadDocument.Visible = false;
         }
     }
 
@@ -46,6 +48,12 @@ public partial class EGovTest : System.Web.UI.Page
     {
         Response.Cache.SetNoStore();
         Response.Cache.SetCacheability(HttpCacheability.NoCache);
+    }
+
+    protected void isEnabledButtons(bool value)
+    {
+        btnDeleteUsersOnSCIM.Enabled = value;
+        btnBulkOnSCIM.Enabled = value;
     }
 
     protected void ChangeVisibility(bool visible)
@@ -83,7 +91,14 @@ public partial class EGovTest : System.Web.UI.Page
         {
             List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
 
-            TestSessionRequestsParameterList = utility.spCreateTestSessionRequests(Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]));
+            int methodID = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
+
+            if (methodID == ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID)
+            {
+                uploadDocument.Visible = true;
+            }
+
+            TestSessionRequestsParameterList = utility.spCreateTestSessionRequests(methodID);
 
             if (TestSessionRequestsParameterList.Count > 0)
             {
@@ -111,6 +126,10 @@ public partial class EGovTest : System.Web.UI.Page
             log.Info("START TESTING METHOD: " + MethodName);
             WebApiCallsByMethod(methodID);
             log.Info("END TESTING METHOD: " + MethodName);
+
+            //todo FOR TEST MULTITREADING - UPLOAD DOCUMENTS
+            //TestMultitreadingTask(out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome);
+            //log.Info("ON THE END. Response " + Response + " ResponseStatus " + ResponseStatus + " ResponseExternal " + ResponseExternal + " ResponseStatusExternal " + ResponseStatusExternal + " FinalOutcome " + FinalOutcome);
 
             ScriptManager.RegisterStartupScript(this, GetType(), "SuccessSendingData", "SuccessSendingData();", true);
         }
@@ -181,7 +200,7 @@ public partial class EGovTest : System.Web.UI.Page
                 {
                     username = ApiUtils.ParseJsonTwoValues(item.RequestData, "user", "username");
                 }
-                if (MethodId == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME || MethodId == ConstantsProject.SEARCH_USER_ID_BY_USERNAME || MethodId == ConstantsProject.EXPORT_AUTH_INFO_BY_USERNAME)
+                if (MethodId == ConstantsProject.EXPORT_USER_INFO_BY_USERNAME || MethodId == ConstantsProject.SEARCH_USER_ID_BY_USERNAME || MethodId == ConstantsProject.EXPORT_AUTH_INFO_BY_USERNAME || MethodId == ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID || MethodId == ConstantsProject.LIST_DOCUMENTS_METHOD_ID)
                 {
                     username = ApiUtils.ParseJsonOneValue(item.RequestData, "username");
                 }
@@ -210,6 +229,40 @@ public partial class EGovTest : System.Web.UI.Page
             throw new Exception("Error while trying to finish test session. Result is: " + result);
         }
     }
+
+    protected void TestMultitreadingTask(out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    {
+        string ResponseEnd = string.Empty;
+        string ResponseStatusEnd = string.Empty;
+        string ResponseExternalEnd = string.Empty;
+        string ResponseStatusExternalEnd = string.Empty;
+        bool FinalOutcomeEnd = false;
+
+        log.Info("Start UploadDocuments_WebAPICalls. ");
+        //////////////////////////////////////////////
+        //UPLOAD DOCUMENT FOR X USERS IN THE SAME TIME
+        //////////////////////////////////////////////
+        string usernameTest1 = "test002171@pisbulk.com";
+        string usernameTest2 = "test002186@pisbulk.com";
+        string usernameTest3 = "test002172@pisbulk.com";
+        System.Threading.Thread.Sleep(2000);
+
+        var UploadDocumentFirstUser = Task.Run(() => DocumentMethods_WebAPICalls(string.Empty, usernameTest1, ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd));
+        var UploadDocumentSecondUser = Task.Run(() => DocumentMethods_WebAPICalls(string.Empty, usernameTest2, ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd));
+        var UploadDocumentThirdUser = Task.Run(() => DocumentMethods_WebAPICalls(string.Empty, usernameTest3, ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd));
+
+        Task.WaitAll(new[] { UploadDocumentFirstUser, UploadDocumentSecondUser, UploadDocumentThirdUser });
+
+        log.Info("End UploadDocuments_WebAPICalls. ");
+
+        Response = ResponseEnd;
+        ResponseStatus = ResponseStatusEnd;
+        ResponseExternal = ResponseExternalEnd;
+        ResponseStatusExternal = ResponseStatusExternalEnd;
+        FinalOutcome = FinalOutcomeEnd;
+    }
+
+
 
     protected void WebAPICalls(string jsonData, string UMCN, string Username, int MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
     {
@@ -276,7 +329,28 @@ public partial class EGovTest : System.Web.UI.Page
                     Validate_WebAPICalls(jsonData, ConstantsProject.REMOVE_AUTHENTICATION_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End RemoveAuthentication_WebAPICalls. ");
                     break;
-                case 15:
+                case ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID:
+                    log.Info("Start UploadDocuments_WebAPICalls. ");
+                    //////////////////////////////////////////////
+                    //UPLOAD DOCUMENT FOR X USERS IN THE SAME TIME
+                    //////////////////////////////////////////////
+                    string usernameTest1 = "test002151@pisbulk.com";
+                    string usernameTest2 = "test002155@pisbulk.com";
+                    System.Threading.Thread.Sleep(3000);
+
+                    var UploadDocumentFirstUser = Task.Run(() => DocumentMethods_WebAPICalls(string.Empty, usernameTest1, ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd));
+                    var UploadDocumentSecondUser = Task.Run(() => DocumentMethods_WebAPICalls(string.Empty, usernameTest2, ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd));
+
+                    Task.WaitAll(new[] { UploadDocumentFirstUser, UploadDocumentSecondUser });
+
+                    log.Info("End UploadDocuments_WebAPICalls. ");
+                    break;
+                case ConstantsProject.LIST_DOCUMENTS_METHOD_ID:
+                    log.Info("Start ListDocuments_WebAPICalls. ");
+                    DocumentMethods_WebAPICalls(string.Empty, Username, ConstantsProject.LIST_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End ListDocuments_WebAPICalls. ");
+                    break;
+                case 20:
                     break;
             }
         }
@@ -733,15 +807,14 @@ public partial class EGovTest : System.Web.UI.Page
     {
         if (CheckBox1.Checked == true)
         {
-            btnDeleteUsersOnSCIM.Enabled = true;
-            btnBulkOnSCIM.Enabled = true;
+            isEnabledButtons(true);
         }
         else
         {
-            btnDeleteUsersOnSCIM.Enabled = false;
-            btnBulkOnSCIM.Enabled = false;
+            isEnabledButtons(false);
         }
     }
+
 
     protected void btnBulkOnSCIM_Click(object sender, EventArgs e)
     {
@@ -787,6 +860,90 @@ public partial class EGovTest : System.Web.UI.Page
         catch (Exception ex)
         {
             log.Error("Error on click btnBulkOnSCIM. " + ex.Message);
+            ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
+        }
+    }
+
+
+    /// <summary>
+    /// DOCUMENT METHODS TESTING
+    /// </summary>
+    public string fileName { get; set; }
+    public string fileFormat { get; set; }
+
+    protected void btnUploadClick(object sender, EventArgs e)
+    {
+        HttpPostedFile file = Request.Files["myFile"];
+
+        //check file was submitted
+        if (file != null && file.ContentLength > 0)
+        {
+            fileName = Path.GetFileName(file.FileName);
+            Session["EGovTest_fileName"] = fileName;
+            fileFormat = Path.GetExtension(fileName);
+            Session["EGovTest_fileFormat"] = fileFormat;
+            log.Info("fileName is: " + fileName + " .fileFormat is: " + fileFormat);
+            file.SaveAs(Server.MapPath(Path.Combine("~/App_Data/", fileName)));
+        }
+    }
+
+    protected void DocumentMethods_WebAPICalls(string jsonData, string username, int MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    {
+        Response = string.Empty;
+        ResponseStatus = string.Empty;
+        ResponseExternal = string.Empty;
+        ResponseStatusExternal = string.Empty;
+        FinalOutcome = false;
+        string resultResponse = string.Empty;
+        string statusCode = string.Empty;
+        string statusDescription = string.Empty;
+        string resulNotOK = string.Empty;
+        Dictionary<string, object> postParameters = new Dictionary<string, object>();
+        try
+        {
+            if (MethodId == ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID)
+            {
+                string hrefDocuments = System.Configuration.ConfigurationManager.AppSettings["hrefDocuments"].ToString();
+                string filePath = hrefDocuments + Session["EGovTest_fileName"].ToString();
+                //log.Info("filePath is: " + filePath);
+
+                byte[] bytes = System.IO.File.ReadAllBytes(filePath);
+                ApiUtils.FileParameter fileParameter = new ApiUtils.FileParameter(bytes, Session["EGovTest_fileName"].ToString(), "multipart/form-data");
+                //// Generate post objects
+                postParameters.Add("filename", Session["EGovTest_fileName"].ToString());
+                postParameters.Add("fileformat", Session["EGovTest_fileFormat"].ToString());
+                postParameters.Add("file", fileParameter);
+
+                log.Info("Start document Upload. Username: " + username + " . " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
+                string Test_Response = ApiUtils.Documents_WebRequestCall(MethodId, bytes, postParameters, jsonData, username, ConstantsProject.DOCUMENTS_POST_METHOD, string.Empty, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
+                log.Info("End document Upload. Username: " + username + " . " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
+            }
+            else if (MethodId == ConstantsProject.LIST_DOCUMENTS_METHOD_ID)
+            {
+                byte[] bytes1 = new byte[0];
+                log.Info("Start List documents. Username: " + username + " . " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
+                string Test_Response = ApiUtils.Documents_WebRequestCall(MethodId, bytes1, postParameters, jsonData, username, ConstantsProject.DOCUMENTS_GET_METHOD, string.Empty, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
+                log.Info("End List documents. Username: " + username + " . " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
+            }
+
+
+            ResponseStatus = statusCode + " " + statusDescription;
+            log.Info("ResponseStatus: " + ResponseStatus);
+            if (Convert.ToInt32(statusCode) == ConstantsProject.DOCUMENTS_METHOD_ОК)
+            {
+                FinalOutcome = true;
+                Response = resultResponse;
+            }
+            else
+            {
+                Response = resulNotOK;
+            }
+            log.Info("End document Upload2. Username: " + username + " . " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
+            ScriptManager.RegisterStartupScript(this, GetType(), "SuccessSendingData", "SuccessSendingData();", true);
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error in function DocumentMethods_WebAPICalls. " + ex.Message);
             ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
         }
     }

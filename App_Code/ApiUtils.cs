@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.XPath;
 using Newtonsoft.Json.Linq;
+using System.Collections.Specialized;
 
 public static class ApiUtils
 {
@@ -75,6 +76,8 @@ public static class ApiUtils
     public static string RemoveAuthentication_Method_Out { get; set; }
     public static string RemoveAuthentication_Username_Out { get; set; }
     public static string RemoveAuthentication_Password_Out { get; set; }
+    public static string Documents_Url_Out { get; set; }
+    public static string Documents_ContentType_Out { get; set; }
     /******BASIC AUTH*******/
     public static string RegisterUser_BasicAuth { get; set; }
     public static string SearchUserIDByUsername_BasicAuth { get; set; }
@@ -88,6 +91,9 @@ public static class ApiUtils
     public static string ExportAuthInfo_BasicAuth { get; set; }
     public static string AddAuthentication_BasicAuth { get; set; }
     public static string RemoveAuthentication_BasicAuth { get; set; }
+    /**/
+    public static byte[] formData;
+    
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -258,6 +264,14 @@ public static class ApiUtils
                         RemoveAuthentication_Password_Out = RemoveAuthentication_Password_Out_Final;
                         RemoveAuthentication_BasicAuth = RemoveAuthentication_Username_Out + ":" + RemoveAuthentication_Password_Out;
                         navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigatorMoveToNextLoop(navigator, 11);
+                    }
+                    if (navigator.Name == "Documents")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string Documents_Url_Out_Final, out string Documents_ContentType_Out_Final, out string Documents_Method_Out_Final, out string Documents_Username_Out_Final, out string Documents_Password_Out_Final);
+                        Documents_Url_Out = Documents_Url_Out_Final;
+                        Documents_ContentType_Out = Documents_ContentType_Out_Final;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
                     }
                 } while (navigator.MoveToNext());
             }
@@ -325,7 +339,7 @@ public static class ApiUtils
     public static string RegisterUser_WebRequestCall(string data, out string result_Final_RegisterUser, out string StatusCode_Final_RegisterUser, out string StatusDescription_Final_RegisterUser, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, RegisterUser_Url_Out, RegisterUser_Method_Out, RegisterUser_ContentType_Out, RegisterUser_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, RegisterUser_Url_Out, RegisterUser_Method_Out, RegisterUser_ContentType_Out, RegisterUser_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_RegisterUser = StatusCodeFinal;
         StatusDescription_Final_RegisterUser = StatusDescriptionFinal;
@@ -338,7 +352,7 @@ public static class ApiUtils
     public static string SearchUserIDByUsername_WebRequestCall(string data, string username, out string result_Final_SearchUserIDByUsername, out string StatusCode_Final_SearchUserIDByUsername, out string StatusDescription_Final_SearchUserIDByUsername, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, (SearchUserIDByUsername_Url_Out + username), SearchUserIDByUsername_Method_Out, SearchUserIDByUsername_ContentType_Out, SearchUserIDByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, (SearchUserIDByUsername_Url_Out + username), SearchUserIDByUsername_Method_Out, SearchUserIDByUsername_ContentType_Out, SearchUserIDByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_SearchUserIDByUsername = StatusCodeFinal;
         StatusDescription_Final_SearchUserIDByUsername = StatusDescriptionFinal;
@@ -354,7 +368,7 @@ public static class ApiUtils
         /*******************************/
         if (Method == ConstantsProject.DELETE_METHOD)
         {
-            WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), Method, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            WebCall = WebRequestCall(false, formData, data, (SCIMcheckData_Url_Out + UserID), Method, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
             StatusCode_Final_SCIMcheckData = StatusCodeFinal;
             StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
             result_Final_SCIMcheckData = resultFinal;
@@ -362,7 +376,7 @@ public static class ApiUtils
         }
         else if (Method == ConstantsProject.PUT_METHOD)
         {
-            WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), Method, "application/json", SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            WebCall = WebRequestCall(false, formData, data, (SCIMcheckData_Url_Out + UserID), Method, "application/json", SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
             StatusCode_Final_SCIMcheckData = StatusCodeFinal;
             StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
             result_Final_SCIMcheckData = resultFinal;
@@ -370,7 +384,7 @@ public static class ApiUtils
         }
         else
         {
-            WebCall = WebRequestCall(data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            WebCall = WebRequestCall(false, formData, data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
             StatusCode_Final_SCIMcheckData = StatusCodeFinal;
             StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
             result_Final_SCIMcheckData = resultFinal;
@@ -382,7 +396,7 @@ public static class ApiUtils
     public static string SCIMcheckData_WebRequestCall_All(string data, out string result_Final_SCIMcheckData_All, out string StatusCode_Final_SCIMcheckData_All, out string StatusDescription_Final_SCIMcheckData_All, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, SCIMcheckData_Url_Out, SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, SCIMcheckData_Url_Out, SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_SCIMcheckData_All = StatusCodeFinal;
         StatusDescription_Final_SCIMcheckData_All = StatusDescriptionFinal;
@@ -395,7 +409,7 @@ public static class ApiUtils
     public static string ValidateCode_WebRequestCall(string data, out string result_Final_ValidateCode, out string StatusCode_Final_ValidateCode, out string StatusDescription_Final_ValidateCode, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, ValidateCode_Url_Out, ValidateCode_Method_Out, ValidateCode_ContentType_Out, ValidateCode_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, ValidateCode_Url_Out, ValidateCode_Method_Out, ValidateCode_ContentType_Out, ValidateCode_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ValidateCode = resultFinal;
         StatusCode_Final_ValidateCode = StatusCodeFinal;
@@ -408,7 +422,7 @@ public static class ApiUtils
     public static string ValidateUsername_WebRequestCall(string data, out string result_Final_ValidateUsername, out string StatusCode_Final_ValidateUsername, out string StatusDescription_Final_ValidateUsername, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, ValidateUsername_Url_Out, ValidateUsername_Method_Out, ValidateUsername_ContentType_Out, ValidateUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, ValidateUsername_Url_Out, ValidateUsername_Method_Out, ValidateUsername_ContentType_Out, ValidateUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ValidateUsername = resultFinal;
         StatusCode_Final_ValidateUsername = StatusCodeFinal;
@@ -421,7 +435,7 @@ public static class ApiUtils
     public static string ValidateUMCN_WebRequestCall(string data, out string result_Final_ValidateUMCN, out string StatusCode_Final_ValidateUMCN, out string StatusDescription_Final_ValidateUMCN, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, ValidateUMCN_Url_Out, ValidateUMCN_Method_Out, ValidateUMCN_ContentType_Out, ValidateUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, ValidateUMCN_Url_Out, ValidateUMCN_Method_Out, ValidateUMCN_ContentType_Out, ValidateUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ValidateUMCN = resultFinal;
         StatusCode_Final_ValidateUMCN = StatusCodeFinal;
@@ -434,7 +448,7 @@ public static class ApiUtils
     public static string ExportUserInfoByUsername_WebRequestCall(string data, string username, out string result_Final_ExportUserInfoByUsername, out string StatusCode_Final_ExportUserInfoByUsername, out string StatusDescription_Final_ExportUserInfoByUsername, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, (ExportUserInfoByUsername_Url_Out + username), ExportUserInfoByUsername_Method_Out, ExportUserInfoByUsername_ContentType_Out, ExportUserInfoByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, (ExportUserInfoByUsername_Url_Out + username), ExportUserInfoByUsername_Method_Out, ExportUserInfoByUsername_ContentType_Out, ExportUserInfoByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ExportUserInfoByUsername = resultFinal;
         StatusCode_Final_ExportUserInfoByUsername = StatusCodeFinal;
@@ -447,7 +461,7 @@ public static class ApiUtils
     public static string SearchUserIDByUMCN_WebRequestCall(string data, string umcn, out string result_Final_SearchUserIDByUMCN, out string StatusCode_Final_SearchUserIDByUMCN, out string StatusDescription_Final_SearchUserIDByUMCN, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, (SearchUserIDByUMCN_Url_Out + umcn), SearchUserIDByUMCN_Method_Out, SearchUserIDByUMCN_ContentType_Out, SearchUserIDByUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, (SearchUserIDByUMCN_Url_Out + umcn), SearchUserIDByUMCN_Method_Out, SearchUserIDByUMCN_ContentType_Out, SearchUserIDByUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_SearchUserIDByUMCN = StatusCodeFinal;
         StatusDescription_Final_SearchUserIDByUMCN = StatusDescriptionFinal;
@@ -460,7 +474,7 @@ public static class ApiUtils
     public static string CreateUsersInBulk_WebRequestCall(string data, out string result_Final_CreateUsersInBulk, out string StatusCode_Final_CreateUsersInBulk, out string StatusDescription_Final_CreateUsersInBulk, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, CreateUsersInBulk_Url_Out, CreateUsersInBulk_Method_Out, CreateUsersInBulk_ContentType_Out, CreateUsersInBulk_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, CreateUsersInBulk_Url_Out, CreateUsersInBulk_Method_Out, CreateUsersInBulk_ContentType_Out, CreateUsersInBulk_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_CreateUsersInBulk = StatusCodeFinal;
         StatusDescription_Final_CreateUsersInBulk = StatusDescriptionFinal;
@@ -474,7 +488,7 @@ public static class ApiUtils
     public static string ExportAuthInfo_WebRequestCall(string data, string username, out string result_Final_ExportAuthInfo, out string StatusCode_Final_ExportAuthInfo, out string StatusDescription_Final_ExportAuthInfo, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, (ExportAuthInfo_Url_Out + username), ExportAuthInfo_Method_Out, ExportAuthInfo_ContentType_Out, ExportAuthInfo_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, (ExportAuthInfo_Url_Out + username), ExportAuthInfo_Method_Out, ExportAuthInfo_ContentType_Out, ExportAuthInfo_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ExportAuthInfo = resultFinal;
         StatusCode_Final_ExportAuthInfo = StatusCodeFinal;
@@ -487,7 +501,7 @@ public static class ApiUtils
     public static string AddAuthentication_WebRequestCall(string data, out string result_Final_AddAuthentication, out string StatusCode_Final_AddAuthentication, out string StatusDescription_Final_AddAuthentication, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, AddAuthentication_Url_Out, AddAuthentication_Method_Out, AddAuthentication_ContentType_Out, AddAuthentication_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, AddAuthentication_Url_Out, AddAuthentication_Method_Out, AddAuthentication_ContentType_Out, AddAuthentication_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_AddAuthentication = resultFinal;
         StatusCode_Final_AddAuthentication = StatusCodeFinal;
@@ -500,7 +514,7 @@ public static class ApiUtils
     public static string RemoveAuthentication_WebRequestCall(string data, out string result_Final_RemoveAuthentication, out string StatusCode_Final_RemoveAuthentication, out string StatusDescription_Final_RemoveAuthentication, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(data, RemoveAuthentication_Url_Out, RemoveAuthentication_Method_Out, RemoveAuthentication_ContentType_Out, RemoveAuthentication_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = WebRequestCall(false, formData, data, RemoveAuthentication_Url_Out, RemoveAuthentication_Method_Out, RemoveAuthentication_ContentType_Out, RemoveAuthentication_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_RemoveAuthentication = resultFinal;
         StatusCode_Final_RemoveAuthentication = StatusCodeFinal;
@@ -510,13 +524,48 @@ public static class ApiUtils
         return WebCall;
     }
 
-
-    public static string WebRequestCall(string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
+    public static string Documents_WebRequestCall(int MethodId, byte[] bytes, Dictionary<string, object> postParameters, string data, string username, string Method, string documentId, out string result_Final_Documents, out string StatusCode_Final_Documents, out string StatusDescription_Final_Documents, out string resultFinal_NotOK)
     {
+        string WebCall = string.Empty;
+        string resultFinal = string.Empty;
+        string StatusCodeFinal = string.Empty;
+        string StatusDescriptionFinal = string.Empty;
+        string resultFinalBad = string.Empty;
+        /*** ***/
+        string formDataBoundary = String.Format("----------{0:N}", Guid.NewGuid());
+        string contentType = Documents_ContentType_Out + formDataBoundary;
+        formData = GetMultipartFormData(postParameters, formDataBoundary);
+        /*******************************/
+        if (Method == ConstantsProject.DOCUMENTS_POST_METHOD)
+        {
+            WebCall = WebRequestCall(true, formData, data, (Documents_Url_Out + username), ConstantsProject.DOCUMENTS_POST_METHOD, contentType, string.Empty, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
+        }
+        else if (Method == ConstantsProject.DOCUMENTS_GET_METHOD)
+        {
+            if (MethodId == ConstantsProject.LIST_DOCUMENTS_METHOD_ID)
+            {
+                WebCall = WebRequestCall(false, formData, data, (Documents_Url_Out + username), ConstantsProject.DOCUMENTS_GET_METHOD, string.Empty, string.Empty, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
+            }
+            else
+            {
+                WebCall = WebRequestCall(true, formData, data, (Documents_Url_Out + username + "/" + documentId), ConstantsProject.DOCUMENTS_GET_METHOD, contentType, string.Empty, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
+            }
+        }
+        /*******************************/
+        result_Final_Documents = resultFinal;
+        StatusCode_Final_Documents = StatusCodeFinal;
+        StatusDescription_Final_Documents = StatusDescriptionFinal;
+        resultFinal_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
+
+    public static string WebRequestCall(bool isDocumentsMethod, byte[] formData, string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
+    {
+        string result = string.Empty;
         StatusCodeFinal = string.Empty;
         StatusDescriptionFinal = string.Empty;
         result_Final_NotOK = string.Empty;
-        string result = string.Empty;
         resultFinal = string.Empty;
         try
         {
@@ -526,6 +575,7 @@ public static class ApiUtils
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
 
+            /****httpWebRequest****/
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(apiUrl);
             httpWebRequest.Timeout = 300000; //300sec
             httpWebRequest.ContentType = apiContentType;
@@ -548,11 +598,27 @@ public static class ApiUtils
                 }
             }
 
+            string userAgent = "Someone";
+       
+            if (isDocumentsMethod)
+            {
+                httpWebRequest.UserAgent = userAgent;
+                httpWebRequest.CookieContainer = new CookieContainer();
+                httpWebRequest.ContentLength = formData.Length;
+
+                // Send the form data to the request.
+                using (Stream requestStream = httpWebRequest.GetRequestStream())
+                {
+                    requestStream.Write(formData, 0, formData.Length);
+                    requestStream.Close();
+                }
+            }
+
             try
             {
-                log.Info("Before getting response. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
+                log.Info("Before getting response. " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
                 var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-                log.Info("After getting response. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
+                log.Info("After getting response. " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
                 GetStatusAndDescriptionCode(httpResponse, out string StatusCode, out string StatusDescription);
                 StatusCodeFinal = StatusCode;
                 StatusDescriptionFinal = StatusDescription;
@@ -662,4 +728,77 @@ public static class ApiUtils
 
         return res;
     }
+
+
+    private static readonly Encoding encoding = Encoding.UTF8;
+
+    private static byte[] GetMultipartFormData(Dictionary<string, object> postParameters, string boundary)
+    {
+        Stream formDataStream = new System.IO.MemoryStream();
+        bool needsCLRF = false;
+
+        foreach (var param in postParameters)
+        {
+            // Thanks to feedback from commenters, add a CRLF to allow multiple parameters to be added.
+            // Skip it on the first parameter, add it to subsequent parameters.
+            if (needsCLRF)
+                formDataStream.Write(encoding.GetBytes("\r\n"), 0, encoding.GetByteCount("\r\n"));
+
+            needsCLRF = true;
+
+            if (param.Value is FileParameter)
+            {
+                FileParameter fileToUpload = (FileParameter)param.Value;
+
+                // Add just the first part of this param, since we will write the file data directly to the Stream
+                string header = string.Format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\";\r\nContent-Type: {3}\r\n\r\n",
+                    boundary,
+                    param.Key,
+                    fileToUpload.FileName ?? param.Key,
+                    fileToUpload.ContentType ?? "application/octet-stream");
+
+                formDataStream.Write(encoding.GetBytes(header), 0, encoding.GetByteCount(header));
+
+                // Write the file data directly to the Stream, rather than serializing it to a string.
+                formDataStream.Write(fileToUpload.File, 0, fileToUpload.File.Length);
+            }
+            else
+            {
+                string postData = string.Format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}",
+                    boundary,
+                    param.Key,
+                    param.Value);
+                formDataStream.Write(encoding.GetBytes(postData), 0, encoding.GetByteCount(postData));
+            }
+        }
+
+        // Add the end of the request.  Start with a newline
+        string footer = "\r\n--" + boundary + "--\r\n";
+        formDataStream.Write(encoding.GetBytes(footer), 0, encoding.GetByteCount(footer));
+
+        // Dump the Stream into a byte[]
+        formDataStream.Position = 0;
+        byte[] formData = new byte[formDataStream.Length];
+        formDataStream.Read(formData, 0, formData.Length);
+        formDataStream.Close();
+
+        return formData;
+    }
+
+
+    public class FileParameter
+    {
+        public byte[] File { get; set; }
+        public string FileName { get; set; }
+        public string ContentType { get; set; }
+        public FileParameter(byte[] file) : this(file, null) { }
+        public FileParameter(byte[] file, string filename) : this(file, filename, null) { }
+        public FileParameter(byte[] file, string filename, string contenttype)
+        {
+            File = file;
+            FileName = filename;
+            ContentType = contenttype;
+        }
+    }
+
 }

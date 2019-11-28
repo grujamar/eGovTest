@@ -89,6 +89,14 @@
                 <div class="col-md-11 col-lg-9">
                     <section class="user-login-wrapper mt-5 rounded">
                         <div class="user-login-inner text-center py-5">
+                                <div id="uploadDocument" class="mt-2 mb-5" runat="server">
+                                    <br />
+                                    <div id="UploadForm" class="mb-2"> 
+                                        <asp:FileUpload ID="myFile" runat="server" />
+                                            <br />
+                                            <asp:Button runat="server" ID="btnUpload" OnClick="btnUploadClick" Text="Upload" />
+                                    </div>
+                                </div>
                                 <div id="afterCreateTest" runat="server">
                                     <p class="px-5 text-primary font-weight-bold">Test is created. Click on button to start testing.</p>
                                     <asp:Button ID="btnStartTest" runat="server" CssClass="btn btn-primary px-4" Text="Start" OnClick="btnStartTest_Click" />

@@ -84,4 +84,8 @@
     <username></username>
     <password></password>
   </RemoveAuthentication>
+  <Documents>
+    <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/documents/</url>
+    <contentType>multipart/form-data; boundary=</contentType>
+  </Documents>
 </parameters>
