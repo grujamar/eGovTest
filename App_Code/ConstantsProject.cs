@@ -30,6 +30,7 @@ public class ConstantsProject
     public const int REMOVE_AUTHENTICATION_METHOD_ID = 12;
     public const int UPLOAD_DOCUMENTS_METHOD_ID = 13;
     public const int LIST_DOCUMENTS_METHOD_ID = 14;
+    public const int DOWNLOAD_DOCUMENTS_METHOD_ID = 15;
     /// <summary>
     /// ////////
     /// </summary>
