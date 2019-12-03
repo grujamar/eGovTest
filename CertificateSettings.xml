@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<settings>
+  <Certificate>
+    <serialnumber>214ef0257e07ab22587e1dbcceb51cd3aab5a170</serialnumber>
+    <usingCertificate>0</usingCertificate>
+    <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/secure</url>
+    <method>GET</method>
+  </Certificate>
+</settings>

@@ -54,6 +54,7 @@ public partial class EGovTest : System.Web.UI.Page
     {
         btnDeleteUsersOnSCIM.Enabled = value;
         btnBulkOnSCIM.Enabled = value;
+        btnTestSecure.Enabled = value;
     }
 
     protected void ChangeVisibility(bool visible)
@@ -958,5 +959,43 @@ public partial class EGovTest : System.Web.UI.Page
             log.Error("Error in function DocumentMethods_WebAPICalls. " + ex.Message);
             ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
         }
+    }
+
+    protected void btnTestSecure_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            string Response = string.Empty;
+            string ResponseStatus = string.Empty;
+            string ResponseExternal = string.Empty;
+            string ResponseStatusExternal = string.Empty;
+            string ResponseSearch = string.Empty;
+            string ResponseStatusSearch = string.Empty;
+            string jsonData = string.Empty;
+            bool FinalOutcomeFirstStep = false;
+
+            log.Info("Test secure connection start. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
+            string TestSecureConn_Response = ApiUtils.TestSecureConn_WebRequestCall(jsonData, out string resultResponse, out string statusCode, out string statusDescription, out string resulNotOK);
+            log.Info("Test secure connection end1. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
+            ResponseStatus = statusCode + " " + statusDescription;
+            if (Convert.ToInt32(statusCode) == ConstantsProject.REGISTER_USER_ОК)
+            {
+                FinalOutcomeFirstStep = true;
+                Response = resultResponse;
+            }
+            else
+            {
+                Response = resulNotOK;
+            }
+            log.Info("Test secure connection end2. " + DateTime.Now.ToString("yyyy MM dd HH:mm:ss:FFF"));
+            //log.Info("Register user in BULK end. Response result is: " + Response + " " + ResponseStatus);
+            ScriptManager.RegisterStartupScript(this, GetType(), "SuccessSendingData", "SuccessSendingData();", true);
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error on click btnTestSecure. " + ex.Message);
+            ScriptManager.RegisterStartupScript(this, GetType(), "ErrorSendingData", "ErrorSendingData();", true);
+        }
+
     }
 }
