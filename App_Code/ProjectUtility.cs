@@ -457,6 +457,40 @@ public class ProjectUtility
         return test;
     }
 
+
+    public List<string> getUsernamesUploadDocument()
+    {
+        List<string> responses = new List<string>();
+        string tableName = "vUploadDocuments";
+
+        string upit = @"select Username from " + tableName + "";
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand(upit, objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.Text;
+                    objConn.Open();
+                    SqlDataReader reader = objCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        responses.Add(reader.GetSqlString(0).ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error while getting UsernamesUploadDocument. " + ex.Message);
+                    throw new Exception("Error while getting UsernamesUploadDocument. " + ex.Message);
+                }
+            }
+        }
+
+        return responses;
+    }
+
+
 }
 /*
 public void loginAdmin(string Username, string Password, out int IDLogAdmin, out int result)
