@@ -491,6 +491,86 @@ public class ProjectUtility
     }
 
 
+    public void updateStartTimeDocumentAction(string Username, DateTime startTime)
+    {
+        string upit = @"update UserDocumentAction set StartTime=@startTime WHERE Username = @username";
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand(upit, objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.Text;
+                    objCmd.Parameters.AddWithValue("@username", Username);
+                    objCmd.Parameters.AddWithValue("@startTime", startTime);
+                    objConn.Open();
+                    objCmd.ExecuteNonQuery();
+                    objConn.Close();
+
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in fuction updateStartTimeDocumentAction. " + ex.Message);
+                    throw new Exception("Error in fuction updateStartTimeDocumentAction. " + ex.Message);
+                }
+            }
+        }
+    }
+
+    public void updateFinishTimeDocumentAction(string Username, DateTime finishTime)
+    {
+        string upit = @"update UserDocumentAction set FinishTime=@finishTime WHERE Username = @username";
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand(upit, objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.Text;
+                    objCmd.Parameters.AddWithValue("@username", Username);
+                    objCmd.Parameters.AddWithValue("@finishTime", finishTime);
+                    objConn.Open();
+                    objCmd.ExecuteNonQuery();
+                    objConn.Close();
+
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in fuction updateFinishTimeDocumentAction. " + ex.Message);
+                    throw new Exception("Error in fuction updateFinishTimeDocumentAction. " + ex.Message);
+                }
+            }
+        }
+    }
+
+    public void updateDocumentIdDocumentAction(string Username, string DocumentId)
+    {
+        string upit = @"update UserDocumentAction set DocumentId=@documentid WHERE Username = @username";
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand(upit, objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.Text;
+                    objCmd.Parameters.AddWithValue("@username", Username);
+                    objCmd.Parameters.AddWithValue("@documentid", DocumentId);
+                    objConn.Open();
+                    objCmd.ExecuteNonQuery();
+                    objConn.Close();
+
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in fuction updateDocumentIdDocumentAction. " + ex.Message);
+                    throw new Exception("Error in fuction updateDocumentIdDocumentAction. " + ex.Message);
+                }
+            }
+        }
+    }
 }
 /*
 public void loginAdmin(string Username, string Password, out int IDLogAdmin, out int result)

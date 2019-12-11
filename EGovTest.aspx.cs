@@ -145,7 +145,7 @@ public partial class EGovTest : System.Web.UI.Page
         TestSessionRequestsParameterList = (List<TestSessionRequestsParameters>)Session["EGovTest_TestSessionRequestsParameterList"];
         log.Info("TestCombinationList length: " + TestSessionRequestsParameterList.Count);
 
-        //get TestSessionId from first object poarameter
+        //get TestSessionId from first object parameter
         var firstElement = TestSessionRequestsParameterList.First();
         int TestSessionId = firstElement.TestSessionId;
         log.Info("TestSessionId is: " + TestSessionId);
@@ -206,7 +206,7 @@ public partial class EGovTest : System.Web.UI.Page
                     umcn = ApiUtils.ParseJsonOneValue(item.RequestData, "umcn");
                 }
                 WebAPICalls(item.RequestData, umcn, username, MethodId, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome);
-
+                    
                 log.Info("testCombinationFinish with parameters: " + " RequestData - " + item.RequestData + " Response - " + Response + " ResponseStatus - " + ResponseStatus + " ResponseExternal - " + ResponseExternal + " ResponseStatusExternal - " + ResponseStatusExternal + " FinalOutcome - " + FinalOutcome);
                 utility.testCombinationFinish(item.TestCombinationId, Response, ResponseStatus, ResponseExternal, ResponseStatusExternal, FinalOutcome, out result);
                 if (result != 0)
@@ -219,7 +219,7 @@ public partial class EGovTest : System.Web.UI.Page
         {
             throw new Exception("Error. " + ex.Message);
         }
-
+        
         utility.testSessionFinish(TestSessionId, out result);
         if (result != 0)
         {
@@ -235,6 +235,7 @@ public partial class EGovTest : System.Web.UI.Page
         string ResponseExternalEnd = string.Empty;
         string ResponseStatusExternalEnd = string.Empty;
         bool FinalOutcomeEnd = false;
+        ProjectUtility utility = new ProjectUtility();
 
         if (MethodId == ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID)
         {
@@ -242,7 +243,7 @@ public partial class EGovTest : System.Web.UI.Page
             System.Threading.Thread.Sleep(1000);
             foreach (UploadUsernamePath item in UsernamePathList)
             {
-                var UploadDocumentTask = Task.Run(() => DocumentMethods_WebAPICalls(string.Empty, item.Username, item.Path, ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd));
+                var UploadDocumentTask = Task.Run(() => DocumentMethods_WebAPICalls(string.Empty, item.Username, item.Path, ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd)); 
                 TaskList.Add(UploadDocumentTask);
             }
             Task.WaitAll(TaskList.ToArray());
@@ -275,7 +276,8 @@ public partial class EGovTest : System.Web.UI.Page
         string ResponseExternalEnd = string.Empty;
         string ResponseStatusExternalEnd = string.Empty;
         bool FinalOutcomeEnd = false;
-
+        ProjectUtility utility = new ProjectUtility();
+        List<UploadUsernamePath> usernamePathList = new List<UploadUsernamePath>();
         ///For only SEARCH_USER_ID_BY_USERNAME
         bool FinalOutcomeSecondStep = false;
 
@@ -336,11 +338,9 @@ public partial class EGovTest : System.Web.UI.Page
                 case ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID:
                     log.Info("Start UploadDocuments_WebAPICalls. ");
                     //todo FOR TEST MULTITREADING - UPLOAD DOCUMENTS
-                    ProjectUtility utility = new ProjectUtility();
-                    List<UploadUsernamePath> usernamePathList = new List<UploadUsernamePath>();
                     List<string> UsernameList = new List<string>();
                     UsernameList = utility.getUsernamesUploadDocument();
-                    log.Info("UsernameList is " + UsernameList);
+                    log.Info("UsernameList count is " + UsernameList.Count);
                     foreach (var username in UsernameList)
                     {
                         CopyFileToUploadFolderWithUserIdName(username, out string destinationPath);
@@ -351,7 +351,7 @@ public partial class EGovTest : System.Web.UI.Page
                     break;
                 case ConstantsProject.LIST_DOCUMENTS_METHOD_ID:
                     log.Info("Start ListDocuments_WebAPICalls. ");
-                    //DocumentMethods_WebAPICalls(string.Empty, Username, ConstantsProject.LIST_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    DocumentMethods_WebAPICalls(string.Empty, Username, string.Empty, ConstantsProject.LIST_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End ListDocuments_WebAPICalls. ");
                     break;
                 case ConstantsProject.DOWNLOAD_DOCUMENTS_METHOD_ID:
@@ -939,16 +939,14 @@ public partial class EGovTest : System.Web.UI.Page
         string resulNotOK = string.Empty;
         Dictionary<string, object> postParameters = new Dictionary<string, object>();
         byte[] bytes1 = new byte[0];
+        ProjectUtility utility = new ProjectUtility();
 
         try
         {
             if (MethodId == ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID)
             {
                 string hrefDocumentsUploadFinal = System.Configuration.ConfigurationManager.AppSettings["hrefDocumentsUploadFinal"].ToString();
-                //string hrefDocuments = System.Configuration.ConfigurationManager.AppSettings["hrefDocuments"].ToString();
-
                 string filePath = path;
-                //log.Info("filePath is: " + filePath);
 
                 fileName = Path.GetFileName(filePath);
                 fileFormat = Path.GetExtension(fileName);
@@ -960,9 +958,15 @@ public partial class EGovTest : System.Web.UI.Page
                 postParameters.Add("fileformat", fileFormat);
                 postParameters.Add("file", fileParameter);
 
+                utility.updateStartTimeDocumentAction(username, DateTime.Now);
+
                 log.Info("Start document Upload. Username: " + username + " . " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
                 string Test_Response = ApiUtils.Documents_WebRequestCall(MethodId, bytes, postParameters, jsonData, username, ConstantsProject.DOCUMENTS_POST_METHOD, string.Empty, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
                 log.Info("End document Upload. Username: " + username + " . " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
+
+                utility.updateFinishTimeDocumentAction(username, DateTime.Now);
+                string DocumentId = ApiUtils.ParseJsonOneValue(resultResponse, "id");
+                utility.updateDocumentIdDocumentAction(username, DocumentId);
             }
             else if (MethodId == ConstantsProject.LIST_DOCUMENTS_METHOD_ID)
             {
