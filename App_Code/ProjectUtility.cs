@@ -491,9 +491,52 @@ public class ProjectUtility
     }
 
 
-    public void updateStartTimeDocumentAction(string Username, DateTime startTime)
+    public int getUserDocumentID(string username)
     {
-        string upit = @"update UserDocumentAction set StartTime=@startTime WHERE Username = @username";
+        int UserDocumentID = 0;
+
+        string upit = @"SELECT        UserDocumentId
+                        FROM            dbo.UserDocument
+                        WHERE        (Username = @username)";
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand(upit, objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.Text;
+                    objCmd.Parameters.AddWithValue("@username", username);
+                    objConn.Open();
+                    SqlDataReader reader = objCmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        UserDocumentID = reader.GetInt32(0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in fuction getUserDocumentID. " + ex.Message);
+                    throw new Exception("Error in fuction getUserDocumentID. " + ex.Message);
+                }
+            }
+        }
+
+        return UserDocumentID;
+    }
+
+    public void insertStartTimeDocumentAction(string Username, int UserDocumentID, int ActionType, DateTime startTime)
+    {
+        string upit = @"INSERT INTO [dbo].[UserDocumentAction]
+           ([UserDocumentId]
+           ,[StartTime]
+           ,[FinishTime]
+           ,[ActionType])
+             VALUES
+            (@UserDocumentID
+            ,@startTime
+            ,@startTime
+            ,@actiontype)";
 
         using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
         {
@@ -503,6 +546,8 @@ public class ProjectUtility
                 {
                     objCmd.CommandType = System.Data.CommandType.Text;
                     objCmd.Parameters.AddWithValue("@username", Username);
+                    objCmd.Parameters.Add("@UserDocumentID", System.Data.SqlDbType.Int).Value = UserDocumentID;
+                    objCmd.Parameters.Add("@actiontype", System.Data.SqlDbType.Int).Value = ActionType;
                     objCmd.Parameters.AddWithValue("@startTime", startTime);
                     objConn.Open();
                     objCmd.ExecuteNonQuery();
@@ -518,9 +563,9 @@ public class ProjectUtility
         }
     }
 
-    public void updateFinishTimeDocumentAction(string Username, DateTime finishTime)
+    public void updateFinishTimeDocumentAction(int UserDocumentID, int ActionType, DateTime finishTime)
     {
-        string upit = @"update UserDocumentAction set FinishTime=@finishTime WHERE Username = @username";
+        string upit = @"update UserDocumentAction set FinishTime=@finishTime WHERE (UserDocumentId=@UserDocumentID) AND (ActionType=@actiontype)";
 
         using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
         {
@@ -529,7 +574,8 @@ public class ProjectUtility
                 try
                 {
                     objCmd.CommandType = System.Data.CommandType.Text;
-                    objCmd.Parameters.AddWithValue("@username", Username);
+                    objCmd.Parameters.Add("@UserDocumentID", System.Data.SqlDbType.Int).Value = UserDocumentID;
+                    objCmd.Parameters.Add("@actiontype", System.Data.SqlDbType.Int).Value = ActionType;
                     objCmd.Parameters.AddWithValue("@finishTime", finishTime);
                     objConn.Open();
                     objCmd.ExecuteNonQuery();
@@ -545,9 +591,9 @@ public class ProjectUtility
         }
     }
 
-    public void updateDocumentIdDocumentAction(string Username, string DocumentId)
+    public void updateDocumentIdDocument(string Username, string DocumentId)
     {
-        string upit = @"update UserDocumentAction set DocumentId=@documentid WHERE Username = @username";
+        string upit = @"update UserDocument set DocumentId=@documentid WHERE Username = @username";
 
         using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
         {
@@ -570,6 +616,39 @@ public class ProjectUtility
                 }
             }
         }
+    }
+
+
+    public List<DownloadUsernameDocID> getUsernameAndDocumentIdDownloadDocument()
+    {
+        List<DownloadUsernameDocID> responses = new List<DownloadUsernameDocID>();
+        string tableName = "vDownloadDocuments";
+
+        string upit = @"select Username, DocumentId from " + tableName + "";
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand(upit, objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.Text;
+                    objConn.Open();
+                    SqlDataReader reader = objCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        responses.Add(new DownloadUsernameDocID(reader.GetSqlString(0).ToString(), reader.GetSqlString(1).ToString()));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in function getUsernameAndDocumentIdDownloadDocument. " + ex.Message);
+                    throw new Exception("Error in function getUsernameAndDocumentIdDownloadDocument. " + ex.Message);
+                }
+            }
+        }
+
+        return responses;
     }
 }
 /*

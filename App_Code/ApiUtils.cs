@@ -624,7 +624,7 @@ public static class ApiUtils
             }
             else
             {
-                WebCall = WebRequestCall(true, formData, data, (Documents_Url_Out + username + "/" + documentId), ConstantsProject.DOCUMENTS_GET_METHOD, contentType, string.Empty, usingCertificate, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
+                WebCall = WebRequestCall(true, formData, data, (Documents_Url_Out + username + "/" + documentId), ConstantsProject.DOCUMENTS_GET_METHOD, string.Empty, string.Empty, usingCertificate, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
             }
         }
         /*******************************/
@@ -717,7 +717,7 @@ public static class ApiUtils
 
             string userAgent = "Someone";
        
-            if (isDocumentsMethod)
+            if (isDocumentsMethod & apiMethod == ConstantsProject.DOCUMENTS_POST_METHOD)
             {
                 httpWebRequest.UserAgent = userAgent;
                 httpWebRequest.CookieContainer = new CookieContainer();
@@ -743,8 +743,26 @@ public static class ApiUtils
                 {
                     var res = streamReader.ReadToEnd();
                     resultFinal = res;
-                    log.Info("Result is " + res);
+                    //log.Info("Result is " + res);
+                    /////////////////DOWNLOAD FILES/////////////////
+                    if (isDocumentsMethod & apiMethod == ConstantsProject.DOCUMENTS_GET_METHOD)
+                    {
+                        byte[] bytes = Encoding.ASCII.GetBytes(res);
+                        string hrefDocumentsDownloadFinal = System.Configuration.ConfigurationManager.AppSettings["hrefDocumentsDownloadFinal"].ToString();
+                        string fileName = (httpResponse.Headers["Content-Disposition"]).ToString();
+                        log.Info("filename - " + fileName);
+                        string second = fileName.Split(';').Skip(1).FirstOrDefault();
+                        string fileNameFinal = After(second, "=");
+                        log.Info("fileNameFinal - " + fileNameFinal);
+                        File.WriteAllBytes(hrefDocumentsDownloadFinal + fileNameFinal, bytes);
+                    }
+                    else
+                    {
+                        log.Info("Result is " + res);
+                    }
+                    ///////////////////////////////////////////////
                 }
+
             }
             catch (WebException ex)
             {
@@ -778,6 +796,20 @@ public static class ApiUtils
         return result;
     }
 
+    public static string After(this string value, string a)
+    {
+        int posA = value.LastIndexOf(a);
+        if (posA == -1)
+        {
+            return "";
+        }
+        int adjustedPosA = posA + a.Length;
+        if (adjustedPosA >= value.Length)
+        {
+            return "";
+        }
+        return value.Substring(adjustedPosA);
+    }
 
     public static bool AcceptAllCertifications(object sender, System.Security.Cryptography.X509Certificates.X509Certificate certification, System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
     {
@@ -940,7 +972,7 @@ public static class ApiUtils
         string file = null;
         if (!string.IsNullOrEmpty(path))
         {
-            var extensions = new string[] { ".png", ".jpg", ".pdf" };
+            var extensions = new string[] { ".png", ".jpg", ".pdf", ".jpeg" };
             try
             {
                 var di = new DirectoryInfo(path);

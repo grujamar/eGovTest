@@ -50,4 +50,8 @@ public class ConstantsProject
     public const int REMOVE_AUTHENTICATION_ОК = 204;
 
     public const int DOCUMENTS_METHOD_ОК = 200;
+
+    //////////////////////////////
+    public const int UPLOAD_ACTION_TYPE = 1;
+    public const int DOWNLOAD_ACTION_TYPE = 2;
 }

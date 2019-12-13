@@ -78,6 +78,7 @@
                                         <asp:Button ID="btnDeleteUsersOnSCIM" runat="server" CssClass="btn btn-secondary px-4 mb-2" Text="SCIM Delete Users" OnClick="btnDeleteUsersOnSCIM_Click" />
                                         <asp:Button ID="btnBulkOnSCIM" runat="server" CssClass="btn btn-secondary px-4 mb-2" Text="Create Users in Bulk" OnClick="btnBulkOnSCIM_Click" />
                                         <asp:Button ID="btnTestSecure" runat="server" CssClass="btn btn-secondary px-4 mb-2" Text="Test Secure Connection" OnClick="btnTestSecure_Click" />
+                                        <asp:Button ID="btnDownloadFile" runat="server" CssClass="btn btn-secondary px-4 mb-2" Text="Download File" OnClick="btnDownloadFile_Click" />
                                         <asp:CheckBox ID="CheckBox1" runat="server" style="font-size:16px;" CssClass="ml-2" AutoPostBack="true" OnCheckedChanged="CheckBox1_CheckedChanged" Text="enable"/>
                                     </div>
                                 </div>
