@@ -80,6 +80,11 @@ public static class ApiUtils
     public static string RemoveAuthentication_Password_Out { get; set; }
     public static string Documents_Url_Out { get; set; }
     public static string Documents_ContentType_Out { get; set; }
+    public static string SetPassword_Url_Out { get; set; }
+    public static string SetPassword_ContentType_Out { get; set; }
+    public static string SetPassword_Method_Out { get; set; }
+    public static string SetPassword_Username_Out { get; set; }
+    public static string SetPassword_Password_Out { get; set; }
     /******BASIC AUTH*******/
     public static string RegisterUser_BasicAuth { get; set; }
     public static string SearchUserIDByUsername_BasicAuth { get; set; }
@@ -93,6 +98,7 @@ public static class ApiUtils
     public static string ExportAuthInfo_BasicAuth { get; set; }
     public static string AddAuthentication_BasicAuth { get; set; }
     public static string RemoveAuthentication_BasicAuth { get; set; }
+    public static string SetPassword_BasicAuth { get; set; }
     /**/
     public static byte[] formData;
     public static string SerialNumber { get; set; }
@@ -308,12 +314,24 @@ public static class ApiUtils
                         navigator.MoveToFollowing(XPathNodeType.Element);
                         navigatorMoveToNextLoop(navigator, 11);
                     }
+                    if (navigator.Name == "SetPassword")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string SetPassword_Url_Out_Final, out string SetPassword_ContentType_Out_Final, out string SetPassword_Method_Out_Final, out string SetPassword_Username_Out_Final, out string SetPassword_Password_Out_Final);
+                        SetPassword_Url_Out = SetPassword_Url_Out_Final;
+                        SetPassword_ContentType_Out = SetPassword_ContentType_Out_Final;
+                        SetPassword_Method_Out = SetPassword_Method_Out_Final;
+                        SetPassword_Username_Out = SetPassword_Username_Out_Final;
+                        SetPassword_Password_Out = SetPassword_Password_Out_Final;
+                        SetPassword_BasicAuth = SetPassword_Username_Out + ":" + SetPassword_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigatorMoveToNextLoop(navigator, 12);
+                    }
                     if (navigator.Name == "Documents")
                     {
                         LoopingThrowNavigatorChild(navigator, out string Documents_Url_Out_Final, out string Documents_ContentType_Out_Final, out string Documents_Method_Out_Final, out string Documents_Username_Out_Final, out string Documents_Password_Out_Final);
                         Documents_Url_Out = Documents_Url_Out_Final;
                         Documents_ContentType_Out = Documents_ContentType_Out_Final;
-                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigator.MoveToFollowing(XPathNodeType.Element);  
                     }
                 } while (navigator.MoveToNext());
             }
@@ -645,6 +663,19 @@ public static class ApiUtils
         result_Final_TestSecureConn = resultFinal;
         StatusCode_Final_TestSecureConn = StatusCodeFinal;
         StatusDescription_Final_TestSecureConn = StatusDescriptionFinal;
+        resultFinal_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
+
+    public static string SetPassword_WebRequestCall(string data, out string result_Final_SetPassword, out string StatusCode_Final_SetPassword, out string StatusDescription_Final_SetPassword, out string resultFinal_NotOK)
+    {
+        /*******************************/
+        string WebCall = WebRequestCall(false, formData, data, SetPassword_Url_Out, SetPassword_Method_Out, SetPassword_ContentType_Out, SetPassword_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        result_Final_SetPassword = resultFinal;
+        StatusCode_Final_SetPassword = StatusCodeFinal;
+        StatusDescription_Final_SetPassword = StatusDescriptionFinal;
         resultFinal_NotOK = resultFinalBad;
         /*******************************/
         return WebCall;

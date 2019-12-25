@@ -31,6 +31,7 @@ public class ConstantsProject
     public const int UPLOAD_DOCUMENTS_METHOD_ID = 13;
     public const int LIST_DOCUMENTS_METHOD_ID = 14;
     public const int DOWNLOAD_DOCUMENTS_METHOD_ID = 15;
+    public const int SET_PASSWORD_METHOD_ID = 16;
     /// <summary>
     /// ////////
     /// </summary>
@@ -51,6 +52,7 @@ public class ConstantsProject
 
     public const int DOCUMENTS_METHOD_ОК = 200;
 
+    public const int SET_PASSWORD_METHOD_ОК = 204;
     //////////////////////////////
     public const int UPLOAD_ACTION_TYPE = 1;
     public const int DOWNLOAD_ACTION_TYPE = 2;

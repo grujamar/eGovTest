@@ -194,6 +194,7 @@ public partial class EGovTest : System.Web.UI.Page
 
                 string username = string.Empty;
                 string umcn = string.Empty;
+                string password = string.Empty;
                 if (MethodId == ConstantsProject.REGISTER_USER_ID)
                 {
                     username = ApiUtils.ParseJsonTwoValues(item.RequestData, "user", "username");
@@ -363,6 +364,11 @@ public partial class EGovTest : System.Web.UI.Page
                     log.Info("usernameDocumentIDList count is " + usernameDocumentIDList.Count);
                     TestMultitreadingTasks(usernamePathList, usernameDocumentIDList, ConstantsProject.DOWNLOAD_DOCUMENTS_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End DownloadDocuments_WebAPICalls. ");
+                    break;
+                case ConstantsProject.SET_PASSWORD_METHOD_ID:
+                    log.Info("Start SetPassword_WebAPICalls. ");
+                    Validate_WebAPICalls(jsonData, ConstantsProject.SET_PASSWORD_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End SetPassword_WebAPICalls. ");
                     break;
                 case 20:
                     break;
@@ -583,6 +589,12 @@ public partial class EGovTest : System.Web.UI.Page
                 string RemoveAuthentication_Response = ApiUtils.RemoveAuthentication_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
                 ApiResponse(methodID, statusCode, ConstantsProject.REMOVE_AUTHENTICATION_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
             }
+            else if (methodID == ConstantsProject.SET_PASSWORD_METHOD_ID)
+            {
+                string SetPassword_Response = ApiUtils.SetPassword_WebRequestCall(jsonData, out resultResponse, out statusCode, out statusDescription, out resulNotOK);
+                ApiResponse(methodID, statusCode, ConstantsProject.SET_PASSWORD_METHOD_ОК, resultResponse, statusDescription, resulNotOK, out ResponseStatus, out FinalOutcomeFirstStep, out Response);
+            }
+
             log.Info("Validate API for method " + methodID + " end. Response result is: " + Response + " " + ResponseStatus);
 
             FinalOutcome = FinalOutcomeFirstStep;

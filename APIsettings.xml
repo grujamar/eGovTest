@@ -84,6 +84,13 @@
     <username></username>
     <password></password>
   </RemoveAuthentication>
+  <SetPassword>
+    <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/set-password</url>
+    <contentType>application/json</contentType>
+    <method>POST</method>
+    <username></username>
+    <password></password>
+  </SetPassword>
   <Documents>
     <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/documents/</url>
     <contentType>multipart/form-data; boundary=</contentType>

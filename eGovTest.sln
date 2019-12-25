@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.28307.902
+VisualStudioVersion = 15.0.28307.960
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "eGovTest", ".", "{8417881D-FE53-4F56-A7FF-1013D59EF163}"
 	ProjectSection(WebsiteProperties) = preProject
@@ -35,6 +35,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {17C70C96-2849-460E-A9B0-FA5DA9008D2D}
+		SolutionGuid = {44696F89-C355-473F-B6F8-17AEBCEA2C0C}
 	EndGlobalSection
 EndGlobal
