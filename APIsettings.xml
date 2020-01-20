@@ -13,7 +13,7 @@
       <method>GET</method>
       <username></username>
       <password></password>
-  </SearchUserIDByUsername>
+  </SearchUserIDByUsername>  
   <SCIMcheckData>
     <url>https://dev-srv-wso2-02.westeurope.cloudapp.azure.com:9443/scim2/Users/</url>
     <contentType></contentType>
@@ -91,6 +91,13 @@
     <username></username>
     <password></password>
   </SetPassword>
+  <ResendMail>
+    <url>https://prijava.eid.gov.rs/api/identity/user/v1.0/resend-code</url>
+    <contentType>application/json</contentType>
+    <method>POST</method>
+    <username>admin@wso2.com</username>
+    <password>4jE7p5hZZ4R5yax7PNsrZQun</password>
+  </ResendMail>
   <Documents>
     <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/documents/</url>
     <contentType>multipart/form-data; boundary=</contentType>

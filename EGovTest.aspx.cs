@@ -93,8 +93,10 @@ public partial class EGovTest : System.Web.UI.Page
         {
             List<TestSessionRequestsParameters> TestSessionRequestsParameterList = new List<TestSessionRequestsParameters>();
 
+            //---ResendMail---
+            //int methodID = 25;
             int methodID = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
-
+            
             if (methodID == ConstantsProject.UPLOAD_DOCUMENTS_METHOD_ID)
             {
                 uploadDocument.Visible = false; //was true
@@ -123,11 +125,16 @@ public partial class EGovTest : System.Web.UI.Page
         try
         {
             ProjectUtility utility = new ProjectUtility();
+            //---ResendMail---
+            //int methodID = 25;
+            //log.Info("START TESTING METHOD: " + methodID);
+
             int methodID = Convert.ToInt32(Session["EGovTest_ddlSelectedValue"]);
             string MethodName = utility.getMethodName(methodID);
             log.Info("START TESTING METHOD: " + MethodName);
             WebApiCallsByMethod(methodID);
             log.Info("END TESTING METHOD: " + MethodName);
+            //log.Info("END TESTING METHOD: " + methodID);
 
             ScriptManager.RegisterStartupScript(this, GetType(), "SuccessSendingData", "SuccessSendingData();", true);
         }
@@ -166,7 +173,6 @@ public partial class EGovTest : System.Web.UI.Page
                 {
                     throw new Exception("Error while trying to start combination. Result is: " + result);
                 }
-
                 /////////BEFORE STEP-ONLY FOR REGISTER USER////////////
                 if (!item.BeforeStep.Equals("-"))
                 {
@@ -370,7 +376,13 @@ public partial class EGovTest : System.Web.UI.Page
                     Validate_WebAPICalls(jsonData, ConstantsProject.SET_PASSWORD_METHOD_ID, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
                     log.Info("End SetPassword_WebAPICalls. ");
                     break;
-                case 20:
+                //ResendMail
+                case 25:
+                    log.Info("Start ResendMail_WebAPICalls. ");
+                    ResendMail_WebAPICalls(jsonData, Username, out ResponseEnd, out ResponseStatusEnd, out ResponseExternalEnd, out ResponseStatusExternalEnd, out FinalOutcomeEnd);
+                    log.Info("End ResendMail_WebAPICalls. ");
+                    break;
+                case 26:
                     break;
             }
         }
@@ -492,6 +504,42 @@ public partial class EGovTest : System.Web.UI.Page
         catch (Exception ex)
         {
             log.Error("Error in function RegisterUser_WebAPICalls. " + ex.Message);
+        }
+    }
+
+    protected void ResendMail_WebAPICalls(string jsonData, string Username, out string Response, out string ResponseStatus, out string ResponseExternal, out string ResponseStatusExternal, out bool FinalOutcome)
+    {
+        Response = string.Empty;
+        ResponseStatus = string.Empty;
+        ResponseExternal = string.Empty;
+        ResponseStatusExternal = string.Empty;
+        FinalOutcome = false;
+        bool FinalOutcomeFirstStep = false;
+        bool FinalOutcomeSecondStep = false;
+        string jsonData_SearchUserIDByUsername = string.Empty;
+        string ResponseSearch = string.Empty;
+        string ResponseStatusSearch = string.Empty;
+
+        try
+        {
+            //ResendMail user API start
+            log.Info("ResendMail user API start. ");
+            string ResendMail_Response = ApiUtils.ResendMail_WebRequestCall(jsonData, out string resultResponse, out string statusCode, out string statusDescription, out string resulNotOK);
+            ResponseStatus = statusCode + " " + statusDescription;
+            if (Convert.ToInt32(statusCode) == ConstantsProject.REGISTER_USER_ОК)
+            {
+                FinalOutcomeFirstStep = true;
+                Response = resultResponse;
+            }
+            else
+            {
+                Response = resulNotOK;
+            }
+            log.Info("ResendMail user API end. Response result is: " + Response + " " + ResponseStatus);
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error in function ResendMail_WebAPICalls. " + ex.Message);
         }
     }
 

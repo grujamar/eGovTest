@@ -85,6 +85,11 @@ public static class ApiUtils
     public static string SetPassword_Method_Out { get; set; }
     public static string SetPassword_Username_Out { get; set; }
     public static string SetPassword_Password_Out { get; set; }
+    public static string ResendMail_Url_Out { get; set; }
+    public static string ResendMail_ContentType_Out { get; set; }
+    public static string ResendMail_Method_Out { get; set; }
+    public static string ResendMail_Username_Out { get; set; }
+    public static string ResendMail_Password_Out { get; set; }
     /******BASIC AUTH*******/
     public static string RegisterUser_BasicAuth { get; set; }
     public static string SearchUserIDByUsername_BasicAuth { get; set; }
@@ -99,6 +104,7 @@ public static class ApiUtils
     public static string AddAuthentication_BasicAuth { get; set; }
     public static string RemoveAuthentication_BasicAuth { get; set; }
     public static string SetPassword_BasicAuth { get; set; }
+    public static string ResendMail_BasicAuth { get; set; }
     /**/
     public static byte[] formData;
     public static string SerialNumber { get; set; }
@@ -326,13 +332,26 @@ public static class ApiUtils
                         navigator.MoveToFollowing(XPathNodeType.Element);
                         navigatorMoveToNextLoop(navigator, 12);
                     }
+                    if (navigator.Name == "ResendMail")
+                    {
+                        LoopingThrowNavigatorChild(navigator, out string ResendMail_Url_Out_Final, out string ResendMail_ContentType_Out_Final, out string ResendMail_Method_Out_Final, out string ResendMail_Username_Out_Final, out string ResendMail_Password_Out_Final);
+                        ResendMail_Url_Out = ResendMail_Url_Out_Final;
+                        ResendMail_ContentType_Out = ResendMail_ContentType_Out_Final;
+                        ResendMail_Method_Out = ResendMail_Method_Out_Final;
+                        ResendMail_Username_Out = ResendMail_Username_Out_Final;
+                        ResendMail_Password_Out = ResendMail_Password_Out_Final;
+                        ResendMail_BasicAuth = ResendMail_Username_Out + ":" + ResendMail_Password_Out;
+                        navigator.MoveToFollowing(XPathNodeType.Element);
+                        navigatorMoveToNextLoop(navigator, 13);
+                    }
                     if (navigator.Name == "Documents")
                     {
                         LoopingThrowNavigatorChild(navigator, out string Documents_Url_Out_Final, out string Documents_ContentType_Out_Final, out string Documents_Method_Out_Final, out string Documents_Username_Out_Final, out string Documents_Password_Out_Final);
                         Documents_Url_Out = Documents_Url_Out_Final;
                         Documents_ContentType_Out = Documents_ContentType_Out_Final;
-                        navigator.MoveToFollowing(XPathNodeType.Element);  
+                        navigator.MoveToFollowing(XPathNodeType.Element);
                     }
+                    
                 } while (navigator.MoveToNext());
             }
         }
@@ -681,6 +700,18 @@ public static class ApiUtils
         return WebCall;
     }
 
+    public static string ResendMail_WebRequestCall(string data, out string result_Final_ResendMail, out string StatusCode_Final_ResendMail, out string StatusDescription_Final_ResendMail, out string result_Final_NotOK)
+    {
+        /*******************************/
+        string WebCall = WebRequestCall(false, formData, data, ResendMail_Url_Out, ResendMail_Method_Out, ResendMail_ContentType_Out, ResendMail_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        /*******************************/
+        StatusCode_Final_ResendMail = StatusCodeFinal;
+        StatusDescription_Final_ResendMail = StatusDescriptionFinal;
+        result_Final_ResendMail = resultFinal;
+        result_Final_NotOK = resultFinalBad;
+        /*******************************/
+        return WebCall;
+    }
 
     public static string WebRequestCall(bool isDocumentsMethod, byte[] formData, string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, string isUsingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
     {
