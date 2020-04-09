@@ -41,6 +41,59 @@ public class ProjectUtility
         }
     }
 
+    public List<string> getUsernameList()
+    {
+        List<string> responses = new List<string>();
+
+        string upit = @"SELECT        UsernameName
+                        FROM            dbo.UsernameTable";
+
+        using (SqlConnection objConn = new SqlConnection(EGovTestingConnectionString))
+        {
+            using (SqlCommand objCmd = new SqlCommand(upit, objConn))
+            {
+                try
+                {
+                    objCmd.CommandType = System.Data.CommandType.Text;
+                    objConn.Open();
+                    SqlDataReader reader = objCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        responses.Add(reader.GetSqlString(0).ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in fuction getUsernameList. " + ex.Message);
+                    throw new Exception("Error in fuction getUsernameList. " + ex.Message);
+                }
+            }
+        }
+
+        return responses;
+    }
+
+    public void updateIsUsernameDeleted(bool isDeleted, string UsernameName)
+    {
+        try
+        {
+            SqlConnection objConn = new SqlConnection(EGovTestingConnectionString);
+            SqlCommand objCmd = new SqlCommand(@"update UsernameTable set isDeleted=@isDeleted where (UsernameName = @UsernameName)", objConn);
+            objCmd.CommandType = System.Data.CommandType.Text;
+
+            objCmd.Parameters.Add("@isDeleted", SqlDbType.Bit).Value = isDeleted;
+            objCmd.Parameters.AddWithValue("@UsernameName", UsernameName);
+
+            objConn.Open();
+            objCmd.ExecuteNonQuery();
+            objConn.Close();
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error in function updateIsUsernameDeleted. " + ex.Message);
+            throw new Exception("Error in function updateIsUsernameDeleted. " + ex.Message);
+        }
+    }
 
     public List<RegisterUserTest> SelectAllCombinationsRegisterUser(int MethodId)
     {

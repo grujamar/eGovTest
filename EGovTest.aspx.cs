@@ -841,47 +841,81 @@ public partial class EGovTest : System.Web.UI.Page
         string ResponseExternal = string.Empty;
         string ResponseStatusExternal = string.Empty;
         bool FinalOutcome = false;
+        string statusCodeSCIM = string.Empty;
+        string deleteAllUsers = System.Configuration.ConfigurationManager.AppSettings["deleteAllUsers"].ToString();
+        List<string> UserIdListScim = new List<string>();
+        List<User> UserIdList = new List<User>();
+        List<string> UsernameList = new List<string>();
+        string Username = string.Empty;
+        string resultFinalSearchUserIDBy = string.Empty;
+        ProjectUtility utility = new ProjectUtility();
 
         try
         {
-            log.Info("Start getting all users in SCIM web service. ");
-            string resultFinalSCIMcheckData = string.Empty;
-            string SCIMcheckData_Response = ApiUtils.SCIMcheckData_WebRequestCall_All(jsonDataSCIM, out resultFinalSCIMcheckData, out string statusCodeSCIM, out string statusDescriptionSCIM, out string resultNotOKscim);
-            ResponseExternal = resultFinalSCIMcheckData;
+            if (deleteAllUsers == "1")
+            {
+                log.Info("Start getting all users from SCIM web service. ");
+                string resultFinalSCIMcheckData = string.Empty;
+                string SCIMcheckData_Response = ApiUtils.SCIMcheckData_WebRequestCall_All(jsonDataSCIM, out resultFinalSCIMcheckData, out statusCodeSCIM, out string statusDescriptionSCIM, out string resultNotOKscim);
+                ResponseExternal = resultFinalSCIMcheckData;
+                UserIdListScim = ParseRequestForSCIMUsers(ResponseExternal);
+                log.Info("UserIdList count is: " + UserIdList.Count);
 
-            //log.Info("RESPONSE TO PARSE:  " + ResponseExternal);
+                ResponseStatusExternal = statusCodeSCIM + " " + statusDescriptionSCIM;
+                log.Info("SCIM Response Status + " + ResponseStatusExternal);
 
-            List<string> UserIdList = new List<string>();
-            UserIdList = ParseRequestForSCIMUsers(ResponseExternal);
-            log.Info("UserIdList count is: " + UserIdList.Count);
+                log.Info("End getting all users from SCIM web service. ");
+            }
+            else
+            {
+                log.Info("-----Start getting users from Database. -----");
+                try
+                {
+                    UsernameList = utility.getUsernameList();
 
-            ResponseStatusExternal = statusCodeSCIM + " " + statusDescriptionSCIM;
-            log.Info("SCIM Response Status + " + ResponseStatusExternal);
+                    foreach (var username in UsernameList)
+                    {
+                        log.Info("Start SearchUserIDByUsername " + username);
+                        string SearchUserIDByUsername_Response = ApiUtils.SearchUserIDByUsername_WebRequestCall(string.Empty, username, out resultFinalSearchUserIDBy, out string statusCodeSearch, out string statusDescriptionSearch, out string resulNotOKsearch);
 
-            log.Info("End getting all users in SCIM web service. ");
+                        string UserId = ApiUtils.ParseJsonOneValue(resultFinalSearchUserIDBy, "userId");
+                        log.Info("End SearchUserIDByUsername. Response result is: " + UserId);
+                        UserIdList.Add(new User(UserId, username, false));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error while getting users from database" + ex);
+                }
 
-            log.Info("Start deleting all users in SCIM web service. ");
+                log.Info("-----End getting users from Database. Count is " + UserIdList.Count + "-----");
+            }
+            
+            log.Info("-----Start deleting users in SCIM web service. -----");
 
-            foreach (var id in UserIdList)
+            foreach (User item in UserIdList)
             {
                 string resultDeleteFinal = string.Empty;
-                string SCIM_DeleteUser_Response = ApiUtils.SCIMcheckData_WebRequestCall(jsonDataSCIM, id, ConstantsProject.DELETE_METHOD, out resultDeleteFinal, out string statusCode, out string statusDescription, out string resultNotOK);
+                string SCIM_DeleteUser_Response = ApiUtils.SCIMcheckData_WebRequestCall(jsonDataSCIM, item.UserId, ConstantsProject.DELETE_METHOD, out resultDeleteFinal, out string statusCode, out string statusDescription, out string resultNotOK);
                 ResponseExternal = resultDeleteFinal;
                 ResponseStatusExternal = statusCode + " " + statusDescription;
-                if (Convert.ToInt32(statusCodeSCIM) == ConstantsProject.REGISTER_USER_SCIM_ОК)
+                if (Convert.ToInt32(statusCode) == ConstantsProject.DELETE_USER_SCIM_ОК)
                 {
                     FinalOutcome = true;
-                    log.Info("Is user with id: " + id + " deleted: " + FinalOutcome);
+                    utility.updateIsUsernameDeleted(FinalOutcome, item.Username);
+                    log.Info("Is user with id: " + item.UserId + " deleted: " + FinalOutcome);
                 }
             }
 
-            log.Info("End deleting all users in SCIM web service. ");
+            log.Info("-----End deleting users in SCIM web service. -----");
+            
         }
         catch (Exception ex)
         {
             log.Error("Error in function SCIM_DeleteUsersById. " + ex.Message);
             throw new Exception("Error in function SCIM_DeleteUsersById. " + ex.Message);
         }
+        
     }
 
     protected List<string> ParseRequestForSCIMUsers(string jsonResponse)

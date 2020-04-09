@@ -17,7 +17,6 @@ using System.Security.Cryptography.X509Certificates;
 public static class ApiUtils
 {
     public static string SettingsFile { get; private set; }
-    public static string SettingsFileCertificate { get; private set; }
     public static string RegisterUser_Url_Out { get; set; }
     public static string RegisterUser_ContentType_Out { get; set; }
     public static string RegisterUser_Method_Out { get; set; }
@@ -107,59 +106,18 @@ public static class ApiUtils
     public static string ResendMail_BasicAuth { get; set; }
     /**/
     public static byte[] formData;
-    public static string SerialNumber { get; set; }
-    public static string usingCertificate { get; set; }
-    public static string TestSecureConn_Url { get; set; }
-    public static string TestSecureConn_Method { get; set; }
 
     private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
     static ApiUtils()
     {
         SettingsFile = AppDomain.CurrentDomain.BaseDirectory + "APIsettings.xml";
-        SettingsFileCertificate = AppDomain.CurrentDomain.BaseDirectory + "CertificateSettings.xml";
         initializeSetup();
     }
 
     public static void initializeSetup()
     {
         getSettings();
-        getCertificateSettings();
-    }
-
-    public static void getCertificateSettings()
-    {
-        try
-        {
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(SettingsFileCertificate);
-            XPathNavigator navigator = xmlDoc.CreateNavigator();
-
-            navigator.MoveToRoot();
-            navigator.MoveToFollowing(System.Xml.XPath.XPathNodeType.Element);//settings
-
-            if (navigator.HasChildren)
-            {
-                navigator.MoveToFirstChild();//<Certificate>
-
-                do
-                {
-                    if (navigator.Name == "Certificate")
-                    {
-                        LoopingThrowCertificateChild(navigator, out string SerialNumber_Out_Final, out string usingCertificate_Out_Final, out string TestSecureConn_Url_Out_Final, out string TestSecureConn_Method_Out_Final);
-                        SerialNumber = SerialNumber_Out_Final;
-                        usingCertificate = usingCertificate_Out_Final;
-                        TestSecureConn_Url = TestSecureConn_Url_Out_Final;
-                        TestSecureConn_Method = TestSecureConn_Method_Out_Final;
-                        navigator.MoveToFollowing(XPathNodeType.Element);
-                    }
-                } while (navigator.MoveToNext());
-            }
-        }
-        catch (Exception ex)
-        {
-            log.Error("Error while reading configuration data from CertificateFile. " + ex.Message);
-        }
     }
 
     public static void getSettings()
@@ -412,47 +370,11 @@ public static class ApiUtils
         } while (navigator.MoveToNext());  
     }
 
-    public static void LoopingThrowCertificateChild(XPathNavigator navigator, out string SerialNumber_Out, out string usingCertificate_Out, out string TestSecureConn_Url, out string TestSecureConn_Method)
-    {
-        SerialNumber_Out = string.Empty;
-        usingCertificate_Out = string.Empty;
-        TestSecureConn_Url = string.Empty;
-        TestSecureConn_Method = string.Empty;
-        do
-        {
-            navigator.MoveToFirstChild();
-            if (navigator.Name == "serialnumber")
-            {
-                SerialNumber_Out = navigator.Value;
-            }
-            navigator.MoveToFollowing(XPathNodeType.Element);
-            if (navigator.Name == "usingCertificate")
-            {
-                usingCertificate_Out = navigator.Value;
-            }
-            navigator.MoveToFollowing(XPathNodeType.Element);
-            if (navigator.Name == "url")
-            {
-                TestSecureConn_Url = navigator.Value;
-            }
-            navigator.MoveToFollowing(XPathNodeType.Element);
-            if (navigator.Name == "method")
-            {
-                TestSecureConn_Method = navigator.Value;
-            }
-            log.Info("Get certificate from settings file : SerialNumber - " + SerialNumber_Out + " usingCertificate - " + usingCertificate_Out + " TestSecureConn_Url - " + TestSecureConn_Url + " TestSecureConn_Method - " + TestSecureConn_Method);
-            navigator.MoveToFollowing(XPathNodeType.Element);
-
-            navigator.MoveToParent();
-
-        } while (navigator.MoveToNext());
-    }
-
 
     public static string RegisterUser_WebRequestCall(string data, out string result_Final_RegisterUser, out string StatusCode_Final_RegisterUser, out string StatusDescription_Final_RegisterUser, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, RegisterUser_Url_Out, RegisterUser_Method_Out, RegisterUser_ContentType_Out, RegisterUser_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, RegisterUser_Url_Out, RegisterUser_Method_Out, RegisterUser_ContentType_Out, RegisterUser_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_RegisterUser = StatusCodeFinal;
         StatusDescription_Final_RegisterUser = StatusDescriptionFinal;
@@ -465,7 +387,7 @@ public static class ApiUtils
     public static string SearchUserIDByUsername_WebRequestCall(string data, string username, out string result_Final_SearchUserIDByUsername, out string StatusCode_Final_SearchUserIDByUsername, out string StatusDescription_Final_SearchUserIDByUsername, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, (SearchUserIDByUsername_Url_Out + username), SearchUserIDByUsername_Method_Out, SearchUserIDByUsername_ContentType_Out, SearchUserIDByUsername_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, (SearchUserIDByUsername_Url_Out + username), SearchUserIDByUsername_Method_Out, SearchUserIDByUsername_ContentType_Out, SearchUserIDByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_SearchUserIDByUsername = StatusCodeFinal;
         StatusDescription_Final_SearchUserIDByUsername = StatusDescriptionFinal;
@@ -481,7 +403,7 @@ public static class ApiUtils
         /*******************************/
         if (Method == ConstantsProject.DELETE_METHOD)
         {
-            WebCall = WebRequestCall(false, formData, data, (SCIMcheckData_Url_Out + UserID), Method, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            WebCall = Wso2Api.WebRequestCall(false, formData, data, (SCIMcheckData_Url_Out + UserID), Method, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
             StatusCode_Final_SCIMcheckData = StatusCodeFinal;
             StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
             result_Final_SCIMcheckData = resultFinal;
@@ -489,7 +411,7 @@ public static class ApiUtils
         }
         else if (Method == ConstantsProject.PUT_METHOD)
         {
-            WebCall = WebRequestCall(false, formData, data, (SCIMcheckData_Url_Out + UserID), Method, "application/json", SCIMcheckData_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            WebCall = Wso2Api.WebRequestCall(false, formData, data, (SCIMcheckData_Url_Out + UserID), Method, "application/json", SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
             StatusCode_Final_SCIMcheckData = StatusCodeFinal;
             StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
             result_Final_SCIMcheckData = resultFinal;
@@ -497,7 +419,7 @@ public static class ApiUtils
         }
         else
         {
-            WebCall = WebRequestCall(false, formData, data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+            WebCall = Wso2Api.WebRequestCall(false, formData, data, (SCIMcheckData_Url_Out + UserID), SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
             StatusCode_Final_SCIMcheckData = StatusCodeFinal;
             StatusDescription_Final_SCIMcheckData = StatusDescriptionFinal;
             result_Final_SCIMcheckData = resultFinal;
@@ -509,7 +431,7 @@ public static class ApiUtils
     public static string SCIMcheckData_WebRequestCall_All(string data, out string result_Final_SCIMcheckData_All, out string StatusCode_Final_SCIMcheckData_All, out string StatusDescription_Final_SCIMcheckData_All, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, SCIMcheckData_Url_Out, SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, SCIMcheckData_Url_Out, SCIMcheckData_Method_Out, SCIMcheckData_ContentType_Out, SCIMcheckData_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_SCIMcheckData_All = StatusCodeFinal;
         StatusDescription_Final_SCIMcheckData_All = StatusDescriptionFinal;
@@ -522,7 +444,7 @@ public static class ApiUtils
     public static string ValidateCode_WebRequestCall(string data, out string result_Final_ValidateCode, out string StatusCode_Final_ValidateCode, out string StatusDescription_Final_ValidateCode, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, ValidateCode_Url_Out, ValidateCode_Method_Out, ValidateCode_ContentType_Out, ValidateCode_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, ValidateCode_Url_Out, ValidateCode_Method_Out, ValidateCode_ContentType_Out, ValidateCode_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ValidateCode = resultFinal;
         StatusCode_Final_ValidateCode = StatusCodeFinal;
@@ -535,7 +457,7 @@ public static class ApiUtils
     public static string ValidateUsername_WebRequestCall(string data, out string result_Final_ValidateUsername, out string StatusCode_Final_ValidateUsername, out string StatusDescription_Final_ValidateUsername, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, ValidateUsername_Url_Out, ValidateUsername_Method_Out, ValidateUsername_ContentType_Out, ValidateUsername_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, ValidateUsername_Url_Out, ValidateUsername_Method_Out, ValidateUsername_ContentType_Out, ValidateUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ValidateUsername = resultFinal;
         StatusCode_Final_ValidateUsername = StatusCodeFinal;
@@ -548,7 +470,7 @@ public static class ApiUtils
     public static string ValidateUMCN_WebRequestCall(string data, out string result_Final_ValidateUMCN, out string StatusCode_Final_ValidateUMCN, out string StatusDescription_Final_ValidateUMCN, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, ValidateUMCN_Url_Out, ValidateUMCN_Method_Out, ValidateUMCN_ContentType_Out, ValidateUMCN_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, ValidateUMCN_Url_Out, ValidateUMCN_Method_Out, ValidateUMCN_ContentType_Out, ValidateUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ValidateUMCN = resultFinal;
         StatusCode_Final_ValidateUMCN = StatusCodeFinal;
@@ -561,7 +483,7 @@ public static class ApiUtils
     public static string ExportUserInfoByUsername_WebRequestCall(string data, string username, out string result_Final_ExportUserInfoByUsername, out string StatusCode_Final_ExportUserInfoByUsername, out string StatusDescription_Final_ExportUserInfoByUsername, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, (ExportUserInfoByUsername_Url_Out + username), ExportUserInfoByUsername_Method_Out, ExportUserInfoByUsername_ContentType_Out, ExportUserInfoByUsername_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, (ExportUserInfoByUsername_Url_Out + username), ExportUserInfoByUsername_Method_Out, ExportUserInfoByUsername_ContentType_Out, ExportUserInfoByUsername_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ExportUserInfoByUsername = resultFinal;
         StatusCode_Final_ExportUserInfoByUsername = StatusCodeFinal;
@@ -574,7 +496,7 @@ public static class ApiUtils
     public static string SearchUserIDByUMCN_WebRequestCall(string data, string umcn, out string result_Final_SearchUserIDByUMCN, out string StatusCode_Final_SearchUserIDByUMCN, out string StatusDescription_Final_SearchUserIDByUMCN, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, (SearchUserIDByUMCN_Url_Out + umcn), SearchUserIDByUMCN_Method_Out, SearchUserIDByUMCN_ContentType_Out, SearchUserIDByUMCN_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, (SearchUserIDByUMCN_Url_Out + umcn), SearchUserIDByUMCN_Method_Out, SearchUserIDByUMCN_ContentType_Out, SearchUserIDByUMCN_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_SearchUserIDByUMCN = StatusCodeFinal;
         StatusDescription_Final_SearchUserIDByUMCN = StatusDescriptionFinal;
@@ -587,7 +509,7 @@ public static class ApiUtils
     public static string CreateUsersInBulk_WebRequestCall(string data, out string result_Final_CreateUsersInBulk, out string StatusCode_Final_CreateUsersInBulk, out string StatusDescription_Final_CreateUsersInBulk, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, CreateUsersInBulk_Url_Out, CreateUsersInBulk_Method_Out, CreateUsersInBulk_ContentType_Out, CreateUsersInBulk_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, CreateUsersInBulk_Url_Out, CreateUsersInBulk_Method_Out, CreateUsersInBulk_ContentType_Out, CreateUsersInBulk_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_CreateUsersInBulk = StatusCodeFinal;
         StatusDescription_Final_CreateUsersInBulk = StatusDescriptionFinal;
@@ -601,7 +523,7 @@ public static class ApiUtils
     public static string ExportAuthInfo_WebRequestCall(string data, string username, out string result_Final_ExportAuthInfo, out string StatusCode_Final_ExportAuthInfo, out string StatusDescription_Final_ExportAuthInfo, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, (ExportAuthInfo_Url_Out + username), ExportAuthInfo_Method_Out, ExportAuthInfo_ContentType_Out, ExportAuthInfo_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, (ExportAuthInfo_Url_Out + username), ExportAuthInfo_Method_Out, ExportAuthInfo_ContentType_Out, ExportAuthInfo_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_ExportAuthInfo = resultFinal;
         StatusCode_Final_ExportAuthInfo = StatusCodeFinal;
@@ -614,7 +536,7 @@ public static class ApiUtils
     public static string AddAuthentication_WebRequestCall(string data, out string result_Final_AddAuthentication, out string StatusCode_Final_AddAuthentication, out string StatusDescription_Final_AddAuthentication, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, AddAuthentication_Url_Out, AddAuthentication_Method_Out, AddAuthentication_ContentType_Out, AddAuthentication_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, AddAuthentication_Url_Out, AddAuthentication_Method_Out, AddAuthentication_ContentType_Out, AddAuthentication_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_AddAuthentication = resultFinal;
         StatusCode_Final_AddAuthentication = StatusCodeFinal;
@@ -627,7 +549,7 @@ public static class ApiUtils
     public static string RemoveAuthentication_WebRequestCall(string data, out string result_Final_RemoveAuthentication, out string StatusCode_Final_RemoveAuthentication, out string StatusDescription_Final_RemoveAuthentication, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, RemoveAuthentication_Url_Out, RemoveAuthentication_Method_Out, RemoveAuthentication_ContentType_Out, RemoveAuthentication_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, RemoveAuthentication_Url_Out, RemoveAuthentication_Method_Out, RemoveAuthentication_ContentType_Out, RemoveAuthentication_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_RemoveAuthentication = resultFinal;
         StatusCode_Final_RemoveAuthentication = StatusCodeFinal;
@@ -651,17 +573,17 @@ public static class ApiUtils
         /*******************************/
         if (Method == ConstantsProject.DOCUMENTS_POST_METHOD)
         {
-            WebCall = WebRequestCall(true, formData, data, (Documents_Url_Out + username), ConstantsProject.DOCUMENTS_POST_METHOD, contentType, string.Empty, usingCertificate, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
+            WebCall = Wso2Api.WebRequestCall(true, formData, data, (Documents_Url_Out + username), ConstantsProject.DOCUMENTS_POST_METHOD, contentType, string.Empty, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
         }
         else if (Method == ConstantsProject.DOCUMENTS_GET_METHOD)
         {
             if (MethodId == ConstantsProject.LIST_DOCUMENTS_METHOD_ID)
             {
-                WebCall = WebRequestCall(false, formData, data, (Documents_Url_Out + username), ConstantsProject.DOCUMENTS_GET_METHOD, string.Empty, string.Empty, usingCertificate, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
+                WebCall = Wso2Api.WebRequestCall(false, formData, data, (Documents_Url_Out + username), ConstantsProject.DOCUMENTS_GET_METHOD, string.Empty, string.Empty, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
             }
             else
             {
-                WebCall = WebRequestCall(true, formData, data, (Documents_Url_Out + username + "/" + documentId), ConstantsProject.DOCUMENTS_GET_METHOD, string.Empty, string.Empty, usingCertificate, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
+                WebCall = Wso2Api.WebRequestCall(true, formData, data, (Documents_Url_Out + username + "/" + documentId), ConstantsProject.DOCUMENTS_GET_METHOD, string.Empty, string.Empty, out resultFinal, out StatusCodeFinal, out StatusDescriptionFinal, out resultFinalBad);
             }
         }
         /*******************************/
@@ -673,11 +595,10 @@ public static class ApiUtils
         return WebCall;
     }
 
-
     public static string TestSecureConn_WebRequestCall(string data, out string result_Final_TestSecureConn, out string StatusCode_Final_TestSecureConn, out string StatusDescription_Final_TestSecureConn, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, TestSecureConn_Url, TestSecureConn_Method, string.Empty, string.Empty, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, string.Empty, string.Empty, string.Empty, string.Empty, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_TestSecureConn = resultFinal;
         StatusCode_Final_TestSecureConn = StatusCodeFinal;
@@ -690,7 +611,7 @@ public static class ApiUtils
     public static string SetPassword_WebRequestCall(string data, out string result_Final_SetPassword, out string StatusCode_Final_SetPassword, out string StatusDescription_Final_SetPassword, out string resultFinal_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, SetPassword_Url_Out, SetPassword_Method_Out, SetPassword_ContentType_Out, SetPassword_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, SetPassword_Url_Out, SetPassword_Method_Out, SetPassword_ContentType_Out, SetPassword_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         result_Final_SetPassword = resultFinal;
         StatusCode_Final_SetPassword = StatusCodeFinal;
@@ -703,7 +624,7 @@ public static class ApiUtils
     public static string ResendMail_WebRequestCall(string data, out string result_Final_ResendMail, out string StatusCode_Final_ResendMail, out string StatusDescription_Final_ResendMail, out string result_Final_NotOK)
     {
         /*******************************/
-        string WebCall = WebRequestCall(false, formData, data, ResendMail_Url_Out, ResendMail_Method_Out, ResendMail_ContentType_Out, ResendMail_BasicAuth, usingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
+        string WebCall = Wso2Api.WebRequestCall(false, formData, data, ResendMail_Url_Out, ResendMail_Method_Out, ResendMail_ContentType_Out, ResendMail_BasicAuth, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string resultFinalBad);
         /*******************************/
         StatusCode_Final_ResendMail = StatusCodeFinal;
         StatusDescription_Final_ResendMail = StatusDescriptionFinal;
@@ -711,184 +632,6 @@ public static class ApiUtils
         result_Final_NotOK = resultFinalBad;
         /*******************************/
         return WebCall;
-    }
-
-    public static string WebRequestCall(bool isDocumentsMethod, byte[] formData, string data, string apiUrl, string apiMethod, string apiContentType, string apiAuth, string isUsingCertificate, out string resultFinal, out string StatusCodeFinal, out string StatusDescriptionFinal, out string result_Final_NotOK)
-    {
-        string result = string.Empty;
-        StatusCodeFinal = string.Empty;
-        StatusDescriptionFinal = string.Empty;
-        result_Final_NotOK = string.Empty;
-        resultFinal = string.Empty;
-        try
-        {
-            log.Info("Start getting result ");
-            /////Uvedeno zbog greske:the request was aborted could not create ssl/tls secure channel.
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-            ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
-
-            /****httpWebRequest****/
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create(apiUrl);
-            httpWebRequest.Timeout = 18000000; //18.000sec = 5hours
-            httpWebRequest.ContentType = apiContentType;
-            httpWebRequest.Method = apiMethod;
-
-            /////Uvedeno zbog greske:the request was aborted could not create ssl/tls secure channel.
-            httpWebRequest.ProtocolVersion = HttpVersion.Version10;
-            httpWebRequest.PreAuthenticate = true;
-
-            if (isUsingCertificate == "1")
-            {
-                List<X509Certificate2> certificates = GetCurrentUserCertificates();
-                log.Info("List<X509Certificate2> certificates count is " + certificates.Count);
-
-                if (certificates.Count == 0)
-                {
-                    throw new Exception("No certificates found.");
-                }
-
-                foreach (X509Certificate2 certificate in certificates)
-                {
-                    if (certificate.SerialNumber.Equals(SerialNumber, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        httpWebRequest.ClientCertificates.Add(certificate);
-                        log.Info("Get certificate from list. Certificate is: " + certificate.SerialNumber);
-                        break;
-                    }
-                }
-
-                if (httpWebRequest.ClientCertificates.Count == 0)
-                {
-                    throw new Exception("No certificate with wanted serial number found.");
-                }
-            }
-
-            if (apiAuth != string.Empty)
-            {
-                httpWebRequest.Headers["Authorization"] = "Basic " + Convert.ToBase64String(Encoding.Default.GetBytes(apiAuth));
-            }
-            
-            if (data != string.Empty)
-            { 
-                using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
-                {
-                    streamWriter.Write(data);
-                }
-            }
-
-            string userAgent = "Someone";
-       
-            if (isDocumentsMethod & apiMethod == ConstantsProject.DOCUMENTS_POST_METHOD)
-            {
-                httpWebRequest.UserAgent = userAgent;
-                httpWebRequest.CookieContainer = new CookieContainer();
-                httpWebRequest.ContentLength = formData.Length;
-
-                // Send the form data to the request.
-                using (Stream requestStream = httpWebRequest.GetRequestStream())
-                {
-                    requestStream.Write(formData, 0, formData.Length);
-                    requestStream.Close();
-                }
-            }
-
-            try
-            {
-                log.Info("Before getting response. " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
-                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-                log.Info("After getting response. " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:FFF"));
-                GetStatusAndDescriptionCode(httpResponse, out string StatusCode, out string StatusDescription);
-                StatusCodeFinal = StatusCode;
-                StatusDescriptionFinal = StatusDescription;
-                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    var res = streamReader.ReadToEnd();
-                    resultFinal = res;
-                    //log.Info("Result is " + res);
-                    /////////////////DOWNLOAD FILES/////////////////
-                    if (isDocumentsMethod & apiMethod == ConstantsProject.DOCUMENTS_GET_METHOD)
-                    {
-                        byte[] bytes = Encoding.ASCII.GetBytes(res);
-                        string hrefDocumentsDownloadFinal = System.Configuration.ConfigurationManager.AppSettings["hrefDocumentsDownloadFinal"].ToString();
-                        string fileName = (httpResponse.Headers["Content-Disposition"]).ToString();
-                        log.Info("filename - " + fileName);
-                        string second = fileName.Split(';').Skip(1).FirstOrDefault();
-                        string fileNameFinal = After(second, "=");
-                        log.Info("fileNameFinal - " + fileNameFinal);
-                        File.WriteAllBytes(hrefDocumentsDownloadFinal + fileNameFinal, bytes);
-                    }
-                    else
-                    {
-                        log.Info("Result is " + res);
-                    }
-                    ///////////////////////////////////////////////
-                }
-
-            }
-            catch (WebException ex)
-            {
-                log.Info("Web exception happened: " + ex.Message);
-                using (WebResponse response = ex.Response)
-                { 
-                    HttpWebResponse httpResponse1 = (HttpWebResponse)response;
-                    GetStatusAndDescriptionCode(httpResponse1, out string StatusCode, out string StatusDescription);
-                    StatusCodeFinal = StatusCode;
-                    StatusDescriptionFinal = StatusDescription;
-                    using (var stream = ex.Response.GetResponseStream())
-                    using (var reader = new StreamReader(stream))
-                    {
-                        result = reader.ReadToEnd();
-                        result_Final_NotOK = result;
-                        log.Info("Web exception message: " + result);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error getting result: " + ex.Message + " ||| " + ex.InnerException + " ||| " + ex.StackTrace);
-                //throw new Exception("Error getting result: " + ex.Message + " ||| " + ex.InnerException + " ||| " + ex.StackTrace);
-            }
-        }
-        catch (Exception ex)
-        {
-            log.Error("Error in function WebRequestCall. " + ex.Message);
-            //throw new Exception("Error in function WebRequestCall. " + ex.Message);
-        }
-        return result;
-    }
-
-    public static string After(this string value, string a)
-    {
-        int posA = value.LastIndexOf(a);
-        if (posA == -1)
-        {
-            return "";
-        }
-        int adjustedPosA = posA + a.Length;
-        if (adjustedPosA >= value.Length)
-        {
-            return "";
-        }
-        return value.Substring(adjustedPosA);
-    }
-
-    public static bool AcceptAllCertifications(object sender, System.Security.Cryptography.X509Certificates.X509Certificate certification, System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
-    {
-        return true;
-    }
-
-    public static void GetStatusAndDescriptionCode(HttpWebResponse httpResponse, out string StatusCodeFinal, out string StatusDescriptionFinal)
-    {
-        StatusCodeFinal = string.Empty;
-        int StatusCode = Convert.ToInt32(httpResponse.StatusCode);
-        StatusCodeFinal = StatusCode.ToString();
-
-        StatusDescriptionFinal = string.Empty;
-        string StatusDecription = httpResponse.StatusDescription;
-        StatusDescriptionFinal = StatusDecription;
-        log.Info("Status code is " + StatusCode);
-        log.Info("Status desctiption is " + StatusDecription);
     }
 
     //public static string GetRegisterUserJson(string item_Username, string item_Realm, string item_Password, string item_Externalid, string item_Givenname, string item_Lastname, string item_Emailaddress, string item_DOB, string item_Placeofbirth, string item_Gender, string item_Streetaddress, string item_City, string item_Postalcode, string item_Country)
@@ -1011,23 +754,6 @@ public static class ApiUtils
             ContentType = contenttype;
         }
     }
-
-    public static List<X509Certificate2> GetCurrentUserCertificates()
-    {
-        List<X509Certificate2> certificates = new List<X509Certificate2>();
-        X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-        store.Open(OpenFlags.ReadOnly);
-        log.Info("store.Name is " + store.Name);
-        log.Info("store.Certificates.Count is " + store.Certificates.Count);
-        foreach (X509Certificate2 certificate in store.Certificates)
-        {
-            certificates.Add(certificate);
-            log.Info("Certificates from store: " + certificate);
-        }
-        store.Close();
-        return certificates;
-    }
-
 
     public static string getRandomFile(string path)
     {

@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <parameters>
   <RegisterUser>
-		  <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/me</url>
-		  <contentType>application/json</contentType>
+	  <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/me</url>
+	  <contentType>application/json</contentType>
       <method>POST</method>
       <username></username>
       <password></password>
 	</RegisterUser>
   <SearchUserIDByUsername>
-      <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/pi-info?username=</url>
+      <url>https://prijava.eid.gov.rs/um/user/v1.0/pi-info?username=</url>
       <contentType>application/json</contentType>
       <method>GET</method>
       <username></username>
       <password></password>
   </SearchUserIDByUsername>  
   <SCIMcheckData>
-    <url>https://dev-srv-wso2-02.westeurope.cloudapp.azure.com:9443/scim2/Users/</url>
+    <url>https://prijava.eid.gov.rs/scim2/Users/</url>
     <contentType></contentType>
-    <method>GET</method>
+    <method></method>
     <username>admin@wso2.com</username>
-    <password>admin</password>
+    <password>4jE7p5hZZ4R5yax7PNsrZQun</password>
   </SCIMcheckData>
   <ValidateCode>
     <url>https://srv-cssp-01.westeurope.cloudapp.azure.com/user/v1.0/validate-code</url>

@@ -38,6 +38,7 @@ public class ConstantsProject
 
     public const int REGISTER_USER_ОК = 201;
     public const int REGISTER_USER_SCIM_ОК = 200;
+    public const int DELETE_USER_SCIM_ОК = 204;
 
     ////////////////////////////////////
     public const int VALIDATE_CODE_ОК = 202;
